@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+input {
+  letter-spacing: 0px !important;
+  word-spacing: normal !important;
+  font-family: inherit !important;
+  font-variant-ligatures: none !important;
+  text-transform: none !important;
+}
