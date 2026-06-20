@@ -7,22 +7,21 @@ function Lyrics({ currentSong }) {
     useState("Loading lyrics...")
 
   useEffect(() => {
-
     if (!currentSong) return
 
-    const loadLyrics = async () => {
+    setLyrics("Loading lyrics...")
 
+    const loadLyrics = async () => {
       const data = await getLyrics(
         currentSong.artist,
-        currentSong.title
+        currentSong.title,
+        currentSong.id,
+        currentSong.provider
       )
-
       setLyrics(data)
-
     }
 
     loadLyrics()
-
   }, [currentSong])
 
   if (!currentSong) return null
