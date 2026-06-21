@@ -1,3 +1,4 @@
+import { useState } from "react"
 import {
   FaHome,
   FaSearch,
@@ -9,21 +10,35 @@ import {
 } from "react-icons/fa"
 
 import { Link, useLocation } from "react-router-dom"
+import logo from "../assets/logo.jpg"
 
 function Sidebar({ menuOpen, setMenuOpen, playlists = [], createPlaylist }) {
   const location = useLocation()
+  const [showModal, setShowModal] = useState(false)
+  const [playlistName, setPlaylistName] = useState("")
 
   const isActive = (path) => location.pathname === path
 
   const handleCreate = () => {
-    const name = prompt("Enter playlist name:")
-    if (name && name.trim()) {
-      createPlaylist(name.trim())
+    setShowModal(true)
+  }
+
+  const handleClose = () => {
+    setShowModal(false)
+    setPlaylistName("")
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (playlistName.trim()) {
+      createPlaylist(playlistName.trim())
+      handleClose()
     }
   }
 
   return (
-    <div
+    <>
+      <div
       className={`
         fixed md:static z-50 top-0 left-0 h-screen w-[260px]
         bg-zinc-950/90 border-r border-zinc-900/80 backdrop-blur-xl
@@ -34,21 +49,25 @@ function Sidebar({ menuOpen, setMenuOpen, playlists = [], createPlaylist }) {
       `}
     >
       <div className="flex flex-col h-[85%] overflow-hidden">
-        {/* LOGO & CLOSE BUTTON */}
-        <div className="mb-10 flex items-center justify-between flex-shrink-0">
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-violet-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-violet-950/50 group-hover:scale-105 transition-transform duration-300">
-              <span className="text-white font-black text-lg">A</span>
+        {/* LOGO BRANDING */}
+        <div className="mb-8 flex flex-col items-center justify-center flex-shrink-0 relative w-full text-center">
+          <Link to="/" className="flex flex-col items-center gap-3 group w-full">
+            <div className="relative p-0.5 rounded-2xl bg-gradient-to-tr from-violet-600 to-fuchsia-600 shadow-[0_8px_30px_rgb(124,58,237,0.2)] group-hover:shadow-[0_8px_30px_rgb(124,58,237,0.4)] transition-all duration-300">
+              <img 
+                src={logo} 
+                alt="LESSO TUNES Logo" 
+                className="w-20 h-20 rounded-2xl object-cover border border-zinc-950/20 group-hover:scale-[1.02] transition-all duration-300" 
+              />
             </div>
-            <h1 className="text-2xl font-black tracking-wider text-white group-hover:text-violet-400 transition-colors">
-              AJ<span className="text-violet-500">Music</span>
+            <h1 className="text-lg font-black tracking-[0.2em] text-white group-hover:text-violet-400 transition-colors mt-1">
+              LESSO <span className="text-violet-500">TUNES</span>
             </h1>
           </Link>
 
           {/* MOBILE CLOSE */}
           <button
             onClick={() => setMenuOpen(false)}
-            className="md:hidden p-2 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition"
+            className="md:hidden absolute top-0 right-0 p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition"
           >
             <FaTimes />
           </button>
@@ -158,9 +177,63 @@ function Sidebar({ menuOpen, setMenuOpen, playlists = [], createPlaylist }) {
       {/* FOOTER ACCENT */}
       <div className="relative p-4 rounded-2xl bg-zinc-900/40 border border-zinc-900 text-center overflow-hidden flex-shrink-0">
         <div className="absolute -top-12 -left-12 w-24 h-24 bg-violet-600/10 blur-xl rounded-full" />
-        <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">AJ Music space</p>
+        <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">LESSO Tunes Space</p>
       </div>
     </div>
+
+      {showModal && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div 
+            onClick={handleClose} 
+            className="absolute inset-0 bg-black/75 backdrop-blur-sm transition-opacity"
+          />
+          
+          {/* Modal Content */}
+          <div className="relative bg-zinc-950 border border-zinc-800/80 rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl shadow-black/80 transform transition-all scale-100 animate-in fade-in zoom-in-95 duration-200">
+            {/* Glowing top-right aura */}
+            <div className="absolute -top-12 -right-12 w-32 h-32 bg-violet-600/10 blur-2xl rounded-full pointer-events-none" />
+            
+            <h3 className="text-xl font-black text-white tracking-wide mb-2 flex items-center gap-2">
+              <FaFolder className="text-violet-500" /> Create Playlist
+            </h3>
+            <p className="text-xs text-zinc-400 mb-6 font-semibold">
+              Organize your audio space. Enter a name for your custom playlist.
+            </p>
+            
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <input
+                  type="text"
+                  placeholder="My playlist #1"
+                  value={playlistName}
+                  onChange={(e) => setPlaylistName(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-500 font-semibold text-sm focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all duration-200"
+                  autoFocus
+                  required
+                />
+              </div>
+              
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="px-5 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white font-bold text-xs transition duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-lg shadow-violet-950/40 hover:scale-[1.02] active:scale-95 transition-all duration-200"
+                >
+                  Create Playlist
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 

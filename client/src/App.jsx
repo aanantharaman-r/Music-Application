@@ -10,6 +10,7 @@ import Search from "./pages/Search"
 import PlaylistView from "./pages/PlaylistView"
 import { searchSongs } from "./services/youtube"
 import { searchSaavn } from "./services/saavn"
+import logo from "./assets/logo.jpg"
 
 function App() {
 
@@ -255,10 +256,12 @@ function App() {
         
         {/* MOBILE HEADER */}
         <div className="flex md:hidden items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-900 backdrop-blur-md sticky top-0 z-30">
-          <h1 className="text-2xl font-black tracking-wide">
-            <span className="text-white">A</span>
-            <span className="text-red-500">J</span>
-          </h1>
+          <div className="flex items-center gap-2">
+            <img src={logo} alt="Logo" className="w-8 h-8 rounded-lg object-cover" />
+            <h1 className="text-xl font-black tracking-wide text-white">
+              LESSO <span className="text-violet-500">TUNES</span>
+            </h1>
+          </div>
           <button 
             onClick={() => setMenuOpen(true)}
             className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-red-500 hover:bg-zinc-800 transition"
