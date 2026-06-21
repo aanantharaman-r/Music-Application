@@ -101,16 +101,16 @@ function App() {
   }
 
   // Fetch home trending songs (JioSaavn API)
-  const fetchHomeSongs = async (query = "trending hits") => {
+  const fetchHomeSongs = async (query = "Tamil trending Hits") => {
     try {
       setHomeLoading(true)
       const data = await searchSaavn(query)
       const formatted = (data || []).map(song => ({
         id: song.id,
         title: song.name,
-        artist: song.primaryArtists,
-        image: song.image?.[2]?.link || song.image?.[1]?.link || song.image?.[0]?.link || "",
-        file: song.downloadUrl?.[4]?.link || song.downloadUrl?.[3]?.link || song.downloadUrl?.[2]?.link || "",
+        artist: song.artists?.primary?.map(a => a.name).join(", ") || song.primaryArtists || "",
+        image: song.image?.[2]?.url || song.image?.[1]?.url || song.image?.[0]?.url || song.image?.[2]?.link || song.image?.[1]?.link || song.image?.[0]?.link || "",
+        file: song.downloadUrl?.[4]?.url || song.downloadUrl?.[3]?.url || song.downloadUrl?.[2]?.url || song.downloadUrl?.[4]?.link || song.downloadUrl?.[3]?.link || song.downloadUrl?.[2]?.link || "",
         provider: "jiosaavn"
       }))
       setHomeSongs(formatted)
@@ -133,9 +133,9 @@ function App() {
         formatted = (data || []).map(song => ({
           id: song.id,
           title: song.name,
-          artist: song.primaryArtists,
-          image: song.image?.[2]?.link || song.image?.[1]?.link || song.image?.[0]?.link || "",
-          file: song.downloadUrl?.[4]?.link || song.downloadUrl?.[3]?.link || song.downloadUrl?.[2]?.link || "",
+          artist: song.artists?.primary?.map(a => a.name).join(", ") || song.primaryArtists || "",
+          image: song.image?.[2]?.url || song.image?.[1]?.url || song.image?.[0]?.url || song.image?.[2]?.link || song.image?.[1]?.link || song.image?.[0]?.link || "",
+          file: song.downloadUrl?.[4]?.url || song.downloadUrl?.[3]?.url || song.downloadUrl?.[2]?.url || song.downloadUrl?.[4]?.link || song.downloadUrl?.[3]?.link || song.downloadUrl?.[2]?.link || "",
           provider: "jiosaavn"
         }))
       } else {
@@ -208,9 +208,9 @@ function App() {
       const formatted = (data || []).map(song => ({
         id: song.id,
         title: song.name,
-        artist: song.primaryArtists,
-        image: song.image?.[2]?.link || song.image?.[1]?.link || song.image?.[0]?.link || "",
-        file: song.downloadUrl?.[4]?.link || song.downloadUrl?.[3]?.link || song.downloadUrl?.[2]?.link || "",
+        artist: song.artists?.primary?.map(a => a.name).join(", ") || song.primaryArtists || "",
+        image: song.image?.[2]?.url || song.image?.[1]?.url || song.image?.[0]?.url || song.image?.[2]?.link || song.image?.[1]?.link || song.image?.[0]?.link || "",
+        file: song.downloadUrl?.[4]?.url || song.downloadUrl?.[3]?.url || song.downloadUrl?.[2]?.url || song.downloadUrl?.[4]?.link || song.downloadUrl?.[3]?.link || song.downloadUrl?.[2]?.link || "",
         provider: "jiosaavn"
       }))
       
@@ -336,7 +336,7 @@ function App() {
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-extrabold tracking-tight">Trending Hits</h2>
                   <button 
-                    onClick={() => fetchHomeSongs("trending hits")}
+                    onClick={() => fetchHomeSongs("Tamil trending Hits")}
                     className="text-xs font-bold text-red-500 hover:text-red-400 uppercase tracking-widest transition"
                   >
                     Refresh

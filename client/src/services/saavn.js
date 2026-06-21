@@ -1,6 +1,6 @@
 export const searchSaavn = async (query) => {
   try {
-    const res = await fetch(`https://saavn.dev/api/search/songs?query=${encodeURIComponent(query)}`)
+    const res = await fetch(`https://saavn.sumit.co/api/search/songs?query=${encodeURIComponent(query)}`)
     const data = await res.json()
     if (data.success && data.data && data.data.results) {
       return data.data.results
@@ -11,3 +11,4 @@ export const searchSaavn = async (query) => {
     return []
   }
 }
+

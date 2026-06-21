@@ -23,7 +23,7 @@ export const getLyrics = async (artist, title, songId, provider) => {
   // 1. Try JioSaavn API first
   if (provider === "jiosaavn" && songId) {
     try {
-      const data = await fetchWithTimeout(`https://saavn.dev/api/songs/${songId}/lyrics`, 3000);
+      const data = await fetchWithTimeout(`https://saavn.sumit.co/api/songs/${songId}/lyrics`, 3000);
       if (data && data.success && data.data && data.data.lyrics) {
         return data.data.lyrics;
       }
