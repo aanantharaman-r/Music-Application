@@ -280,8 +280,8 @@ function App() {
                   <span className="px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-xs font-bold text-red-500 uppercase tracking-widest">
                     {greeting}, listener
                   </span>
-                  <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight mt-3">
-                    Your Personal <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-rose-400">Audio Space</span>
+                  <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight mt-3 uppercase welcome-title">
+                    Your Personal <span className="text-red-600 drop-shadow-[3px_3px_0px_rgba(0,0,0,0.95)]">Audio Frontier</span>
                   </h1>
                   <p className="text-zinc-400 text-sm mt-2.5 max-w-md">
                     Explore ad-free music, curated custom categories, and save your favorites in one beautifully designed, responsive app.
