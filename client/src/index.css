@@ -65,27 +65,27 @@
 .custom-slider {
   -webkit-appearance: none;
   appearance: none;
-  background: #261f1b;
-  border: 1px solid #423631;
-  height: 6px;
+  background: #14100e;
+  border: 1px solid #261f1b;
+  height: 4px;
   outline: none;
 }
 
 .custom-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 14px;
-  height: 14px;
-  background: #c91812;
-  border: 2px solid #eadaa2;
+  width: 12px;
+  height: 12px;
+  background: #eadaa2; /* Parchment Cream */
+  border: 2px solid #c91812; /* RDR2 Blood Red */
   cursor: pointer;
-  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.8);
+  box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.9);
   transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .custom-slider::-webkit-slider-thumb:hover {
   transform: scale(1.2);
-  background: #eadaa2;
+  background: #fcf6e3;
 }
 
 /* Animations */

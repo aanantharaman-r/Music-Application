@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react"
 import YouTube from "react-youtube"
 import Lyrics from "./Lyrics"
+import rdrBackground from "../assets/rdr2_background.png"
 
 import {
   FaPlay,
@@ -179,63 +180,65 @@ function Player({
 
       {/* FULL SCREEN PLAYER PAGE */}
       {fullscreen && (
-        <div className="fixed inset-0 z-[10000] bg-[#050505]/98 backdrop-blur-3xl flex flex-col p-6 md:p-12 overflow-y-auto transition-all duration-500 animate-in fade-in slide-in-from-bottom-12">
-          
-          {/* Background Blurred Album Art Aura */}
-          <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none opacity-20">
-            <img src={currentSong.image} alt="" className="w-full h-full object-cover blur-[100px] scale-125" />
+        <div 
+          className="fixed inset-0 z-[10000] flex flex-col p-6 md:p-12 overflow-y-auto transition-all duration-500 animate-in fade-in slide-in-from-bottom-12 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `linear-gradient(to right, rgba(12, 10, 9, 0.45), rgba(12, 10, 9, 0.75)), url(${rdrBackground})` }}
+        >
+          {/* Distressed RDR2 Border Frame */}
+          <div className="absolute inset-4 border-2 border-zinc-800/80 pointer-events-none z-50">
+            <div className="absolute inset-0.5 border border-[#eadaa2]/20 pointer-events-none" />
           </div>
 
           {/* HEADER */}
-          <div className="flex items-center justify-between w-full border-b border-zinc-900 pb-6 mb-8 z-10">
+          <div className="flex items-center justify-between w-full border-b-2 border-zinc-800/80 pb-6 mb-8 z-10">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-red-950/20 border border-red-900/30 text-red-500">
+              <div className="p-2 rounded-none bg-red-950/40 border border-red-900/50 text-red-500">
                 <FaMusic className="text-sm" />
               </div>
-              <span className="text-xs uppercase tracking-widest font-extrabold text-zinc-400">Now Playing</span>
+              <span className="text-xs uppercase tracking-[0.2em] font-black text-zinc-400">Now Playing</span>
             </div>
             
             <button
               onClick={() => setFullscreen(false)}
-              className="p-3.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg"
+              className="p-3.5 rounded-none bg-zinc-950 border border-zinc-800 text-zinc-300 hover:text-white hover:border-red-600 hover:scale-105 active:scale-95 transition-all duration-200 shadow-[3px_3px_0px_rgba(0,0,0,0.8)]"
             >
               <FaCompress className="text-sm" />
             </button>
           </div>
 
           {/* BODY: SPLIT VIEW FOR HUGE ALBUM ART & LYRICS */}
-          <div className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-10 lg:gap-16 z-10 max-w-6xl mx-auto w-full mb-8">
+          <div className="flex-1 flex flex-col lg:flex-row items-stretch justify-center max-w-5xl mx-auto w-full mb-6 gap-6 z-10 overflow-y-auto lg:overflow-hidden">
             
             {/* LEFT COLUMN: HUGE ALBUM ART CARD & TITLES */}
-            <div className="w-full lg:w-[45%] flex flex-col items-center">
+            <div className="w-full lg:w-[48%] flex flex-col items-center justify-center p-6 lg:p-8 border border-zinc-800/60 bg-zinc-950/65 shadow-[6px_6px_0px_rgba(0,0,0,0.85)] gap-4 flex-shrink-0">
               
               {/* Music Card Frame */}
-              <div className="relative aspect-square w-72 md:w-96 rounded-3xl overflow-hidden border border-zinc-800 shadow-[0_20px_50px_rgba(0,0,0,0.8)] glow-pulse group">
+              <div className="relative w-52 h-52 md:w-64 md:h-64 rounded-none overflow-hidden border-4 border-zinc-800 shadow-[6px_6px_0px_rgba(0,0,0,1)] flex-shrink-0 group">
                 <img 
                   src={currentSong.image} 
                   alt="" 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                <span className="absolute bottom-4 left-4 text-[10px] px-2.5 py-1 rounded-md bg-red-600/90 border border-red-500/30 text-white font-bold uppercase tracking-widest">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                <span className="absolute bottom-4 left-4 text-[9px] px-2 py-1 rounded-none bg-red-600 border border-red-500/30 text-white font-black uppercase tracking-widest shadow-md">
                   {currentSong.provider} Mode
                 </span>
               </div>
 
               {/* Title & Artist */}
-              <div className="text-center mt-8 w-full px-4">
-                <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight line-clamp-2 leading-tight">
+              <div className="text-center w-full px-4">
+                <h2 className="text-base md:text-lg font-black text-white tracking-wider line-clamp-2 leading-tight uppercase">
                   {currentSong.title}
                 </h2>
-                <p className="text-red-500 font-bold text-sm md:text-base mt-2">
+                <p className="text-red-500 font-bold text-[10px] md:text-xs mt-1.5 uppercase tracking-[0.15em]">
                   {currentSong.artist}
                 </p>
               </div>
 
               {/* PROGRESS BAR */}
-              <div className="w-full mt-8 px-4">
+              <div className="w-full px-4">
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-bold text-zinc-500 min-w-[32px] text-right">
+                  <span className="text-[10px] font-bold text-zinc-500 min-w-[32px] text-right font-mono">
                     {formatTime(progress)}
                   </span>
                   <input
@@ -254,83 +257,62 @@ function Player({
                     }}
                     className="w-full custom-slider"
                     style={{
-                      background: `linear-gradient(to right, #ef4444 0%, #ef4444 ${progressPercent}%, rgba(255, 255, 255, 0.1) ${progressPercent}%, rgba(255, 255, 255, 0.1) 100%)`
+                      background: `linear-gradient(to right, #c91812 0%, #c91812 ${progressPercent}%, #261f1b ${progressPercent}%, #261f1b 100%)`
                     }}
                   />
-                  <span className="text-xs font-bold text-zinc-500 min-w-[32px]">
+                  <span className="text-[10px] font-bold text-zinc-500 min-w-[32px] font-mono">
                     {formatTime(duration)}
                   </span>
                 </div>
               </div>
 
               {/* PLAYBACK CONTROL BUTTONS */}
-              <div className="flex items-center justify-center gap-8 mt-8 w-full">
+              <div className="flex items-center justify-center gap-4 w-full">
                 <button 
                   onClick={() => setLiked(!liked)} 
-                  className={`p-3 rounded-full border transition-all duration-300 ${
+                  className={`p-3 rounded-none border transition-all duration-200 shadow-[3px_3px_0px_rgba(0,0,0,0.8)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,0.8)] ${
                     liked 
-                      ? "bg-red-500/10 border-red-500/20 text-red-500 scale-110 shadow-lg shadow-red-950/20" 
-                      : "bg-zinc-900/60 border-zinc-800/60 text-zinc-500 hover:text-white"
+                      ? "bg-red-950/20 border-red-600 text-red-500" 
+                      : "bg-zinc-950/40 border-zinc-800/80 text-zinc-400 hover:text-white"
                   }`}
                 >
-                  {liked ? <FaHeart className="text-base" /> : <FaRegHeart className="text-base" />}
+                  {liked ? <FaHeart className="text-xs" /> : <FaRegHeart className="text-xs" />}
                 </button>
 
                 <button 
                   onClick={prevSong} 
-                  className="p-4 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-red-500 hover:scale-105 active:scale-95 transition-all duration-300"
+                  className="p-3 bg-zinc-950/40 border border-zinc-800/80 text-zinc-400 hover:text-red-500 hover:border-red-600 transition-all duration-200 shadow-[3px_3px_0px_rgba(0,0,0,0.8)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,0.8)]"
                 >
-                  <FaBackward className="text-base" />
+                  <FaBackward className="text-xs" />
                 </button>
 
                 {/* PLAY / PAUSE */}
                 <button
                   onClick={togglePlay}
-                  className="w-16 h-16 rounded-full flex items-center justify-center bg-red-600 hover:bg-red-500 text-white shadow-xl shadow-red-950/50 hover:scale-105 active:scale-95 transition-all duration-300"
+                  className="w-12 h-12 rounded-none flex items-center justify-center bg-red-600 hover:bg-red-500 text-white border border-[#eadaa2]/40 shadow-[4px_4px_0px_rgba(0,0,0,0.9)] hover:scale-102 active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all duration-150"
                 >
-                  {playing ? <FaPause className="text-lg" /> : <FaPlay className="text-lg ml-1" />}
+                  {playing ? <FaPause className="text-sm" /> : <FaPlay className="text-sm ml-0.5" />}
                 </button>
 
                 <button 
                   onClick={nextSong} 
-                  className="p-4 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-red-500 hover:scale-105 active:scale-95 transition-all duration-300"
+                  className="p-3 bg-zinc-950/40 border border-zinc-800/80 text-zinc-400 hover:text-red-500 hover:border-red-600 transition-all duration-200 shadow-[3px_3px_0px_rgba(0,0,0,0.8)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,0.8)]"
                 >
-                  <FaForward className="text-base" />
+                  <FaForward className="text-xs" />
                 </button>
 
                 <button 
                   onClick={shuffleSongs} 
-                  className="p-3 rounded-full bg-zinc-900/60 border border-zinc-800/60 text-zinc-500 hover:text-red-500 hover:scale-110 active:scale-95 transition-all duration-300"
+                  className="p-3 bg-zinc-950/40 border border-zinc-800/80 text-zinc-400 hover:text-red-500 hover:border-red-600 transition-all duration-200 shadow-[3px_3px_0px_rgba(0,0,0,0.8)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,0.8)]"
                 >
-                  <FaRandom className="text-sm" />
+                  <FaRandom className="text-xs" />
                 </button>
-              </div>
-
-              {/* VOLUME & SPEAKER CONTROLS */}
-              <div className="flex items-center justify-center gap-3 w-64 mt-8 px-4">
-                <button 
-                  onClick={toggleMute}
-                  className="text-zinc-400 hover:text-red-500 transition-colors"
-                >
-                  {muted ? <FaVolumeMute className="text-red-500 text-base" /> : <FaVolumeUp className="text-zinc-400 text-base" />}
-                </button>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={volume}
-                  onChange={(e) => changeVolume(Number(e.target.value))}
-                  className="w-full custom-slider"
-                  style={{
-                    background: `linear-gradient(to right, #ef4444 0%, #ef4444 ${volumePercent}%, rgba(255, 255, 255, 0.1) ${volumePercent}%, rgba(255, 255, 255, 0.1) 100%)`
-                  }}
-                />
               </div>
 
             </div>
 
             {/* RIGHT COLUMN: DETAILED LYRICS */}
-            <div className="w-full lg:w-[55%] h-full flex flex-col justify-center">
+            <div className="w-full lg:w-[48%] flex flex-col border border-zinc-800/60 bg-zinc-950/65 shadow-[6px_6px_0px_rgba(0,0,0,0.85)]">
               <Lyrics currentSong={currentSong} />
             </div>
 
