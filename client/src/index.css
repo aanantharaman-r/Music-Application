@@ -5,41 +5,41 @@
   --font-sans: 'Outfit', system-ui, -apple-system, sans-serif;
   --font-serif: 'Playfair Display', Georgia, serif;
   
-  --color-violet-500: #c91812; /* RDR2 Blood Red */
-  --color-violet-600: #93100b;
-  --color-fuchsia-600: #4f0906;
-  --color-red-500: #c91812;
-  --color-red-600: #93100b;
+  --color-violet-500: #8b5cf6; 
+  --color-violet-600: #7c3aed;
+  --color-fuchsia-600: #a855f7;
+  --color-red-500: #8b5cf6;
+  --color-red-600: #7c3aed;
   
-  --color-zinc-950: #0b0908; /* Charcoal Black */
-  --color-zinc-900: #14100e; /* Weathered Coal */
-  --color-zinc-800: #261f1b; /* Aged Leather/Wood */
-  --color-zinc-700: #423631; /* Distressed Brown */
-  --color-zinc-600: #695750;
-  --color-zinc-500: #9c847b; /* Vintage Dust */
-  --color-zinc-400: #c5b2a9;
-  --color-zinc-300: #eadaa2; /* Aged Paper Cream */
+  --color-zinc-950: #000000; /* Pure Black */
+  --color-zinc-900: #0d0d0e; /* Dark Charcoal */
+  --color-zinc-800: #18181b; 
+  --color-zinc-700: #27272a; 
+  --color-zinc-600: #3f3f46;
+  --color-zinc-500: #71717a; 
+  --color-zinc-400: #a1a1aa;
+  --color-zinc-300: #ffffff; /* White */
 }
 
 @layer base {
   body {
-    background-color: #0b0908;
-    color: #eadaa2;
+    background-color: #000000;
+    color: #ffffff;
     font-family: 'Outfit', sans-serif;
-    background-image: radial-gradient(circle at 50% 10%, rgba(201, 24, 18, 0.08) 0%, transparent 60%);
+    background-image: radial-gradient(circle at 50% 10%, rgba(139, 92, 246, 0.08) 0%, transparent 60%);
   }
 
-  /* Large Display Headings (Western Theme) */
+  /* Large Display Headings */
   h1, .brand-title, .welcome-title, .rdr-header-large {
-    font-family: 'Rye', cursive, serif !important;
-    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.9);
+    font-family: 'Outfit', sans-serif !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
     letter-spacing: 0.06em;
   }
 
-  /* Standard Headings (Card Titles, Sections, Metadata) */
+  /* Standard Headings */
   h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', Georgia, serif !important;
-    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.8);
+    font-family: 'Outfit', sans-serif !important;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
     font-weight: 800;
   }
 
@@ -49,15 +49,15 @@
     height: 8px;
   }
   ::-webkit-scrollbar-track {
-    background: #0b0908;
-    border-left: 1px solid #261f1b;
+    background: #000000;
+    border-left: 1px solid #18181b;
   }
   ::-webkit-scrollbar-thumb {
-    background: #c91812;
-    border: 2px solid #0b0908;
+    background: #8b5cf6;
+    border: 2px solid #000000;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #eadaa2;
+    background: #ffffff;
   }
 }
 
@@ -65,10 +65,19 @@
 .custom-slider {
   -webkit-appearance: none;
   appearance: none;
-  background: #14100e;
-  border: 1px solid #261f1b;
+  background: transparent;
   height: 4px;
   outline: none;
+  cursor: pointer;
+  --slider-active: #ffffff; /* White active track before hover */
+  --slider-bg: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px; /* Curved track edges */
+  transition: background 0.1s ease;
+}
+
+.custom-slider:hover {
+  --slider-active: #8b5cf6; /* Violet active track on hover */
+  --slider-bg: rgba(255, 255, 255, 0.2);
 }
 
 .custom-slider::-webkit-slider-thumb {
@@ -76,16 +85,36 @@
   appearance: none;
   width: 12px;
   height: 12px;
-  background: #eadaa2; /* Parchment Cream */
-  border: 2px solid #c91812; /* RDR2 Blood Red */
+  border-radius: 50%;
+  background: transparent;
+  border: none;
   cursor: pointer;
-  box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.9);
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+  transform: scale(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.custom-slider::-webkit-slider-thumb:hover {
+.custom-slider:hover::-webkit-slider-thumb {
+  background: #ffffff; /* White circle button */
   transform: scale(1.2);
-  background: #fcf6e3;
+}
+
+/* For Firefox compatibility */
+.custom-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+  transform: scale(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.custom-slider:hover::-moz-range-thumb {
+  background: #ffffff;
+  transform: scale(1.2);
 }
 
 /* Animations */
@@ -95,8 +124,8 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 10px rgba(201, 24, 18, 0.4); }
-  50% { box-shadow: 0 0 20px rgba(201, 24, 18, 0.7); }
+  0%, 100% { box-shadow: 0 0 10px rgba(139, 92, 246, 0.4); }
+  50% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.7); }
 }
 
 .float-animation {
@@ -123,16 +152,16 @@
   animation: bounce-bar 0.6s ease-in-out infinite alternate;
 }
 
-/* RDR2 Distressed Card styling */
+/* Card styling */
 .rdr-card {
-  border: 2px solid #261f1b;
-  background-color: #14100e;
-  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.9);
+  border: 1px solid #18181b;
+  background-color: #0d0d0e;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   transition: all 0.2s ease-in-out;
 }
 
 .rdr-card:hover {
-  border-color: #c91812;
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.95);
+  border-color: #8b5cf6;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.15);
 }
