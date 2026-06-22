@@ -312,6 +312,51 @@ function App() {
     setActiveSongId(null)
   }
 
+  const [appLoading, setAppLoading] = useState(true)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAppLoading(false)
+    }, 4000)
+    return () => clearTimeout(timer)
+  }, [])
+
+  if (appLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#030303] text-white relative overflow-hidden">
+        {/* Background ambient glow */}
+        <div className="absolute w-[400px] h-[400px] bg-red-900/10 blur-[150px] rounded-full pointer-events-none z-0"></div>
+        <div className="absolute w-[300px] h-[300px] bg-purple-900/10 blur-[130px] rounded-full pointer-events-none z-0"></div>
+
+        <div className="z-10 flex flex-col items-center gap-8">
+          {/* Logo container with pulse/glow */}
+          <div className="relative">
+            <div className="absolute -inset-1.5 bg-gradient-to-r from-red-600 to-violet-600 rounded-full blur opacity-75 animate-pulse"></div>
+            <img 
+              src={logo} 
+              alt="Logo" 
+              className="relative w-28 h-28 rounded-full object-cover shadow-2xl border-2 border-zinc-900/50"
+            />
+          </div>
+
+          <div className="flex flex-col items-center gap-3">
+            <h1 className="text-2xl font-black tracking-widest text-white uppercase">
+              LESSO <span className="text-violet-500">TUNES</span>
+            </h1>
+            <p className="text-zinc-500 text-xs tracking-wider font-semibold uppercase">
+              Your Personal Audio Frontier
+            </p>
+          </div>
+
+          {/* Windows-style/circular loader */}
+          <div className="mt-4 flex items-center justify-center">
+            <div className="w-10 h-10 border-4 border-zinc-800 border-t-red-600 rounded-full animate-spin"></div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (!token || !user) {
     return <Auth onAuthSuccess={handleAuthSuccess} />
   }
