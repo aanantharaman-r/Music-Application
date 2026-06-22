@@ -54,11 +54,10 @@ function Auth({ onAuthSuccess }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#020617] px-4 overflow-hidden select-none">
-      {/* Background glow graphics mimicking nature/abstract silhouette in the design */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,#0f172a_0%,#020617_100%)] pointer-events-none" />
-      <div className="absolute top-[20%] left-[10%] w-[350px] h-[350px] bg-violet-600/10 blur-[130px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-[20%] right-[10%] w-[400px] h-[400px] bg-fuchsia-600/10 blur-[150px] rounded-full pointer-events-none" />
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#030303] px-4 overflow-hidden select-none">
+      {/* Background ambient glow matching the loader */}
+      <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-red-900/10 blur-[150px] rounded-full pointer-events-none z-0"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-purple-900/10 blur-[130px] rounded-full pointer-events-none z-0"></div>
 
       {/* Main glass card container */}
       <div className="w-full max-w-[450px] glass-card p-8 md:p-10 relative overflow-hidden transition-all duration-300">
