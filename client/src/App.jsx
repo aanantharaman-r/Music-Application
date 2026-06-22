@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { FaChartBar, FaHeart, FaPlay, FaRandom } from "react-icons/fa"
 import { Routes, Route, Link } from "react-router-dom"
+import axios from "axios"
 
 import Sidebar from "./components/Sidebar"
 import MusicCard from "./components/MusicCard"
@@ -8,11 +9,17 @@ import Player from "./components/Player"
 import Favorites from "./pages/Favorites"
 import Search from "./pages/Search"
 import PlaylistView from "./pages/PlaylistView"
+import Auth from "./pages/Auth"
 import { searchSongs } from "./services/youtube"
 import { searchSaavn } from "./services/saavn"
 import logo from "./assets/logo.jpg"
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api"
+
 function App() {
+
+  const [token, setToken] = useState(localStorage.getItem("aj-token") || "")
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem("aj-user") || "null"))
 
   const [songs, setSongs] = useState([]) // Search results
   const [homeSongs, setHomeSongs] = useState([]) // Home feed
@@ -31,6 +38,7 @@ function App() {
   const [favorites, setFavorites] = useState([])
   const [playlists, setPlaylists] = useState([])
   const [greeting, setGreeting] = useState("Hello")
+
 
   // Curated quick mixes for Home Page (JioSaavn queries)
   const quickMixes = [
@@ -53,53 +61,110 @@ function App() {
   useEffect(() => {
     const savedFav = localStorage.getItem("aj-favorites")
     if (savedFav) setFavorites(JSON.parse(savedFav))
-
-    const savedPlaylists = localStorage.getItem("aj-playlists")
-    if (savedPlaylists) setPlaylists(JSON.parse(savedPlaylists))
   }, [])
 
   useEffect(() => {
     localStorage.setItem("aj-favorites", JSON.stringify(favorites))
   }, [favorites])
 
+  // Fetch playlists from server
+  const fetchPlaylists = async () => {
+    if (!token) return
+    try {
+      const res = await axios.get(`${API_URL}/playlists`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      const formatted = res.data.map(p => ({
+        id: p._id,
+        name: p.name,
+        songs: p.songs || []
+      }))
+      setPlaylists(formatted)
+    } catch (err) {
+      console.error("Error fetching playlists:", err)
+    }
+  }
+
   useEffect(() => {
-    localStorage.setItem("aj-playlists", JSON.stringify(playlists))
-  }, [playlists])
+    if (token) {
+      fetchPlaylists()
+    } else {
+      setPlaylists([])
+    }
+  }, [token])
 
   // Custom Playlist Helpers
-  const createPlaylist = (name) => {
-    const newPlaylist = {
-      id: Date.now().toString(),
-      name,
-      songs: []
+  const createPlaylist = async (name) => {
+    if (!token) return
+    try {
+      const res = await axios.post(`${API_URL}/playlists`, { name }, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      const newP = {
+        id: res.data._id,
+        name: res.data.name,
+        songs: res.data.songs || []
+      }
+      setPlaylists([...playlists, newP])
+    } catch (err) {
+      console.error("Error creating playlist:", err)
     }
-    setPlaylists([...playlists, newPlaylist])
   }
 
-  const deletePlaylist = (id) => {
-    setPlaylists(playlists.filter(p => p.id !== id))
+  const deletePlaylist = async (id) => {
+    if (!token) return
+    try {
+      await axios.delete(`${API_URL}/playlists/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setPlaylists(playlists.filter(p => p.id !== id))
+    } catch (err) {
+      console.error("Error deleting playlist:", err)
+    }
   }
 
-  const addSongToPlaylist = (playlistId, song) => {
-    setPlaylists(playlists.map(p => {
-      if (p.id === playlistId) {
-        // Prevent duplicate songs
-        const exists = p.songs.find(s => s.id === song.id)
-        if (exists) return p
-        return { ...p, songs: [...p.songs, song] }
-      }
-      return p
-    }))
+  const addSongToPlaylist = async (playlistId, song) => {
+    if (!token) return
+    try {
+      const res = await axios.put(`${API_URL}/playlists/${playlistId}/songs`, { song }, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setPlaylists(playlists.map(p => {
+        if (p.id === playlistId) {
+          return {
+            id: res.data._id,
+            name: res.data.name,
+            songs: res.data.songs || []
+          }
+        }
+        return p
+      }))
+    } catch (err) {
+      console.error("Error adding song to playlist:", err)
+    }
   }
 
-  const removeSongFromPlaylist = (playlistId, songId) => {
-    setPlaylists(playlists.map(p => {
-      if (p.id === playlistId) {
-        return { ...p, songs: p.songs.filter(s => s.id !== songId) }
-      }
-      return p
-    }))
+  const removeSongFromPlaylist = async (playlistId, songId) => {
+    if (!token) return
+    try {
+      const res = await axios.delete(`${API_URL}/playlists/${playlistId}/songs/${songId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setPlaylists(playlists.map(p => {
+        if (p.id === playlistId) {
+          return {
+            id: res.data._id,
+            name: res.data.name,
+            songs: res.data.songs || []
+          }
+        }
+        return p
+      }))
+    } catch (err) {
+      console.error("Error removing song from playlist:", err)
+    }
   }
+
 
   // Fetch home trending songs (JioSaavn API)
   const fetchHomeSongs = async (query = "Tamil trending Hits") => {
@@ -230,6 +295,27 @@ function App() {
     }
   }
 
+  const handleAuthSuccess = (newToken, newUser) => {
+    setToken(newToken)
+    setUser(newUser)
+    localStorage.setItem("aj-token", newToken)
+    localStorage.setItem("aj-user", JSON.stringify(newUser))
+  }
+
+  const handleLogout = () => {
+    setToken("")
+    setUser(null)
+    localStorage.removeItem("aj-token")
+    localStorage.removeItem("aj-user")
+    setCurrentSong(null)
+    setCurrentQueue([])
+    setActiveSongId(null)
+  }
+
+  if (!token || !user) {
+    return <Auth onAuthSuccess={handleAuthSuccess} />
+  }
+
   return (
     <div className="flex min-h-screen bg-[#030303] text-white overflow-hidden relative">
 
@@ -250,7 +336,10 @@ function App() {
         setMenuOpen={setMenuOpen} 
         playlists={playlists}
         createPlaylist={createPlaylist}
+        user={user}
+        handleLogout={handleLogout}
       />
+
 
       <div className="flex-1 flex flex-col h-screen overflow-y-auto z-10 pb-32">
         

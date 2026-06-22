@@ -12,7 +12,7 @@ import {
 import { Link, useLocation } from "react-router-dom"
 import logo from "../assets/logo.jpg"
 
-function Sidebar({ menuOpen, setMenuOpen, playlists = [], createPlaylist }) {
+function Sidebar({ menuOpen, setMenuOpen, playlists = [], createPlaylist, user, handleLogout }) {
   const location = useLocation()
   const [showModal, setShowModal] = useState(false)
   const [playlistName, setPlaylistName] = useState("")
@@ -177,8 +177,23 @@ function Sidebar({ menuOpen, setMenuOpen, playlists = [], createPlaylist }) {
       {/* FOOTER ACCENT */}
       <div className="relative p-4 rounded-2xl bg-zinc-900/40 border border-zinc-900 text-center overflow-hidden flex-shrink-0">
         <div className="absolute -top-12 -left-12 w-24 h-24 bg-violet-600/10 blur-xl rounded-full" />
-        <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">LESSO Tunes Space</p>
+        {user ? (
+          <div className="relative z-10 flex flex-col gap-2">
+            <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider truncate">
+              Signed in as <span className="text-violet-400">{user.username}</span>
+            </p>
+            <button
+              onClick={handleLogout}
+              className="w-full py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 text-red-400 hover:text-red-300 font-black text-[10px] tracking-wider uppercase transition-all duration-300"
+            >
+              Logout
+            </button>
+          </div>
+        ) : (
+          <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">LESSO Tunes Space</p>
+        )}
       </div>
+
     </div>
 
       {showModal && (
