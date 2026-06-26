@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { FaChartBar, FaHeart, FaPlay, FaRandom } from "react-icons/fa"
+import { FaChartBar, FaHeart, FaPlay, FaRandom, FaUser, FaMusic } from "react-icons/fa"
 import { Routes, Route, Link } from "react-router-dom"
 import axios from "axios"
 
@@ -34,6 +34,7 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [homeLoading, setHomeLoading] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [showAuth, setShowAuth] = useState(false)
 
   const [favorites, setFavorites] = useState([])
   const [playlists, setPlaylists] = useState([])
@@ -300,6 +301,7 @@ function App() {
     setUser(newUser)
     localStorage.setItem("aj-token", newToken)
     localStorage.setItem("aj-user", JSON.stringify(newUser))
+    setShowAuth(false)
   }
 
   const handleLogout = () => {
@@ -328,38 +330,47 @@ function App() {
         <div className="absolute w-[400px] h-[400px] bg-red-900/10 blur-[150px] rounded-full pointer-events-none z-0"></div>
         <div className="absolute w-[300px] h-[300px] bg-purple-900/10 blur-[130px] rounded-full pointer-events-none z-0"></div>
 
-        <div className="z-10 flex flex-col items-center gap-8">
+        <div className="z-10 flex flex-col items-center gap-8 relative">
+          {/* Animated Music Notes */}
+          <FaMusic className="absolute -top-10 -left-12 text-violet-500/40 text-3xl note-float-1" />
+          <FaMusic className="absolute top-10 -right-16 text-fuchsia-500/40 text-2xl note-float-2" />
+          <FaMusic className="absolute -bottom-6 -left-8 text-rose-500/40 text-xl note-float-3" />
+
           {/* Logo container with pulse/glow */}
-          <div className="relative">
-            <div className="absolute -inset-1.5 bg-gradient-to-r from-red-600 to-violet-600 rounded-full blur opacity-75 animate-pulse"></div>
+          <div className="relative group">
+            <div className="absolute -inset-2 bg-gradient-to-r from-red-600 via-violet-600 to-fuchsia-600 rounded-full blur-md opacity-75 animate-spin-slow"></div>
             <img 
               src={logo} 
               alt="Logo" 
-              className="relative w-28 h-28 rounded-full object-cover shadow-2xl border-2 border-zinc-900/50"
+              className="relative w-32 h-32 rounded-full object-cover shadow-2xl border-[3px] border-zinc-900/80 z-10"
             />
+            {/* Inner record hole */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-zinc-950 rounded-full border border-zinc-800 z-20"></div>
           </div>
 
-          <div className="flex flex-col items-center gap-3">
-            <h1 className="text-2xl font-black tracking-widest text-white uppercase">
+          <div className="flex flex-col items-center gap-3 mt-4">
+            <h1 className="text-3xl font-black tracking-widest text-white uppercase drop-shadow-[0_0_15px_rgba(139,92,246,0.5)]">
               LESSO <span className="text-violet-500">TUNES</span>
             </h1>
-            <p className="text-zinc-500 text-xs tracking-wider font-semibold uppercase">
+            <p className="text-zinc-400 text-xs tracking-[0.3em] font-bold uppercase">
               Your Personal Audio Frontier
             </p>
           </div>
 
-          {/* Windows-style/circular loader */}
-          <div className="mt-4 flex items-center justify-center">
-            <div className="w-10 h-10 border-4 border-zinc-800 border-t-red-600 rounded-full animate-spin"></div>
+          {/* Animated Equalizer */}
+          <div className="mt-6 flex items-end justify-center gap-1.5 h-8">
+            <div className="w-1.5 bg-violet-500 rounded-t-sm visualizer-bar"></div>
+            <div className="w-1.5 bg-fuchsia-500 rounded-t-sm visualizer-bar-fast"></div>
+            <div className="w-1.5 bg-rose-500 rounded-t-sm visualizer-bar-slow"></div>
+            <div className="w-1.5 bg-violet-500 rounded-t-sm visualizer-bar" style={{ animationDelay: '0.2s' }}></div>
+            <div className="w-1.5 bg-fuchsia-500 rounded-t-sm visualizer-bar-fast" style={{ animationDelay: '0.4s' }}></div>
           </div>
         </div>
       </div>
     )
   }
 
-  if (!token || !user) {
-    return <Auth onAuthSuccess={handleAuthSuccess} />
-  }
+
 
   return (
     <div className="flex min-h-screen bg-[#030303] text-white overflow-hidden relative">
@@ -388,20 +399,51 @@ function App() {
 
       <div className="flex-1 flex flex-col h-screen overflow-y-auto z-10 pb-32">
         
-        {/* MOBILE HEADER */}
+        {/* DESKTOP/MAIN HEADER */}
+        <div className="hidden md:flex items-center justify-between px-8 py-4 bg-zinc-950/40 backdrop-blur-md sticky top-0 z-30 border-b border-zinc-900/50">
+          <div className="flex items-center gap-3">
+            <button className="flex items-center justify-center w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition-colors group">
+              <FaUser className="text-lg group-hover:scale-110 transition-transform" />
+            </button>
+            {!user && (
+              <button 
+                onClick={() => setShowAuth(true)}
+                className="px-5 py-2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold text-sm hover:opacity-90 transition-opacity shadow-[0_0_15px_rgba(124,58,237,0.3)]"
+              >
+                Login
+              </button>
+            )}
+            {user && (
+              <span className="text-sm font-bold text-zinc-300">
+                Hi, {user.username}
+              </span>
+            )}
+          </div>
+        </div>
+        
         <div className="flex md:hidden items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-900 backdrop-blur-md sticky top-0 z-30">
           <div className="flex items-center gap-2">
-            <img src={logo} alt="Logo" className="w-8 h-8 rounded-lg object-cover" />
-            <h1 className="text-xl font-black tracking-wide text-white">
-              LESSO <span className="text-violet-500">TUNES</span>
-            </h1>
+            <button className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400">
+              <FaUser className="text-sm" />
+            </button>
+            {!user && (
+              <button 
+                onClick={() => setShowAuth(true)}
+                className="px-3 py-1.5 rounded-full bg-violet-600 text-white font-bold text-xs"
+              >
+                Login
+              </button>
+            )}
           </div>
-          <button 
-            onClick={() => setMenuOpen(true)}
-            className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-red-500 hover:bg-zinc-800 transition"
-          >
-            ☰
-          </button>
+          <div className="flex items-center gap-2">
+            <img src={logo} alt="Logo" className="w-8 h-8 rounded-lg object-cover hidden sm:block" />
+            <button 
+              onClick={() => setMenuOpen(true)}
+              className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-red-500 hover:bg-zinc-800 transition"
+            >
+              ☰
+            </button>
+          </div>
         </div>
 
         <Routes>
@@ -626,6 +668,12 @@ function App() {
         prevSong={prevSong}
       />
 
+      {showAuth && (
+        <Auth 
+          onAuthSuccess={handleAuthSuccess} 
+          onClose={() => setShowAuth(false)} 
+        />
+      )}
     </div>
   )
 }

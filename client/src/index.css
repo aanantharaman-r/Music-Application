@@ -128,12 +128,42 @@
   50% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.7); }
 }
 
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes float-note {
+  0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  50% { transform: translateY(-50px) scale(1.2) rotate(15deg); opacity: 0.8; }
+  100% { transform: translateY(-100px) scale(0.8) rotate(-15deg); opacity: 0; }
+}
+
 .float-animation {
   animation: float 6s ease-in-out infinite;
 }
 
 .glow-pulse {
   animation: pulse-glow 3s infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 4s linear infinite;
+}
+
+.note-float-1 {
+  animation: float-note 3s ease-in-out infinite;
+}
+
+.note-float-2 {
+  animation: float-note 4s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.note-float-3 {
+  animation: float-note 3.5s ease-in-out infinite;
+  animation-delay: 2s;
 }
 
 /* Visualizer Bars Animation */

@@ -5,7 +5,7 @@ import axios from "axios"
 // Use environment or fallback
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api"
 
-function Auth({ onAuthSuccess }) {
+function Auth({ onAuthSuccess, onClose }) {
   const [isLogin, setIsLogin] = useState(true)
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
@@ -61,6 +61,17 @@ function Auth({ onAuthSuccess }) {
 
       {/* Main glass card container */}
       <div className="w-full max-w-[450px] glass-card p-8 md:p-10 relative overflow-hidden transition-all duration-300">
+        {onClose && (
+          <button 
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
+        )}
+
         {/* Top styling accent */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 px-8 py-2 bg-white/10 border-b border-x border-white/10 rounded-b-2xl font-bold tracking-wider text-sm text-zinc-300">
           {isLogin ? "Login" : "Sign Up"}
