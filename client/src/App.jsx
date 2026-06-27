@@ -29,6 +29,7 @@ function App() {
   const [currentIndex, setCurrentIndex] = useState(-1)
   const [currentQueue, setCurrentQueue] = useState([])
   const [queueType, setQueueType] = useState("")
+  const [isShuffle, setIsShuffle] = useState(false)
 
   const [search, setSearch] = useState("tamil hits")
   const [provider, setProvider] = useState("jiosaavn") // Default to JioSaavn for premium audio streams
@@ -267,10 +268,25 @@ function App() {
 
   const nextSong = () => {
     if (!currentQueue.length) return
-    const next = (currentIndex + 1) % currentQueue.length
-    setCurrentSong(currentQueue[next])
-    setCurrentIndex(next)
-    setActiveSongId(currentQueue[next].id)
+    if (isShuffle && queueType === "playlist") {
+      if (currentQueue.length === 1) {
+        setCurrentSong(currentQueue[0])
+        setActiveSongId(currentQueue[0].id)
+        return
+      }
+      let next = currentIndex
+      while (next === currentIndex) {
+        next = Math.floor(Math.random() * currentQueue.length)
+      }
+      setCurrentSong(currentQueue[next])
+      setCurrentIndex(next)
+      setActiveSongId(currentQueue[next].id)
+    } else {
+      const next = (currentIndex + 1) % currentQueue.length
+      setCurrentSong(currentQueue[next])
+      setCurrentIndex(next)
+      setActiveSongId(currentQueue[next].id)
+    }
   }
 
   const prevSong = () => {
@@ -280,8 +296,6 @@ function App() {
     setCurrentIndex(prev)
     setActiveSongId(currentQueue[prev].id)
   }
-
-  // Shuffle play favorites list
   const playFavoritesRandom = () => {
     if (!favorites.length) return
     const randomIndex = Math.floor(Math.random() * favorites.length)
@@ -706,6 +720,8 @@ function App() {
         setCurrentIndex={setCurrentIndex}
         setActiveSongId={setActiveSongId}
         showToast={showToast}
+        isShuffle={isShuffle}
+        setIsShuffle={setIsShuffle}
       />
 
       {showAuth && (

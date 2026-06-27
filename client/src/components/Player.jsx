@@ -23,7 +23,6 @@ function Player({
   setCurrentSong = () => {},
   nextSong,
   prevSong,
-  shuffleSongs = () => {},
   favorites = [],
   setFavorites = () => {},
   playlists = [],
@@ -32,7 +31,9 @@ function Player({
   queueType = "",
   setCurrentIndex = () => {},
   setActiveSongId = () => {},
-  showToast = () => {}
+  showToast = () => {},
+  isShuffle = false,
+  setIsShuffle = () => {}
 }) {
 
   const playerRef = useRef(null)
@@ -353,11 +354,35 @@ function Player({
                   <FaForward className="text-xs" />
                 </button>
  
+                {queueType === "playlist" && (
+                  <button 
+                    onClick={() => {
+                      setIsShuffle(!isShuffle)
+                      showToast(isShuffle ? "Shuffle Off" : "Shuffle On")
+                    }}
+                    className={`w-11 h-11 flex items-center justify-center rounded-full border transition-all duration-200 shadow-md active:scale-95 ${
+                      isShuffle 
+                        ? "bg-violet-950/20 border-violet-600 text-violet-500" 
+                        : "bg-zinc-950/40 border-zinc-800/80 text-zinc-400 hover:text-white"
+                    }`}
+                    title="Shuffle"
+                  >
+                    <FaRandom className="text-xs" />
+                  </button>
+                )}
+
                 <button 
-                  onClick={shuffleSongs} 
-                  className="w-11 h-11 flex items-center justify-center rounded-full bg-zinc-950/40 border border-zinc-800/80 text-zinc-400 hover:text-red-500 hover:border-red-600 transition-all duration-200 shadow-md active:scale-95"
+                  onClick={() => setRepeat(!repeat)} 
+                  className={`w-11 h-11 flex items-center justify-center rounded-full border transition-all duration-200 shadow-md active:scale-95 ${
+                    repeat 
+                      ? "bg-violet-950/20 border-violet-600 text-violet-500" 
+                      : "bg-zinc-950/40 border-zinc-800/80 text-zinc-400 hover:text-white"
+                  }`}
+                  title="Loop"
                 >
-                  <FaRandom className="text-xs" />
+                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                    <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
+                  </svg>
                 </button>
               </div>
  
@@ -468,13 +493,18 @@ function Player({
 
             {/* CONTROLS */}
             <div className="flex items-center gap-5">
-              <button 
-                onClick={shuffleSongs} 
-                className="text-zinc-400 hover:text-white p-1.5 transition-colors"
-                title="Shuffle"
-              >
-                <FaRandom className="text-xs" />
-              </button>
+              {queueType === "playlist" && (
+                <button 
+                  onClick={() => {
+                    setIsShuffle(!isShuffle)
+                    showToast(isShuffle ? "Shuffle Off" : "Shuffle On")
+                  }}
+                  className={`p-1.5 transition-colors ${isShuffle ? "text-violet-500 hover:text-violet-400" : "text-zinc-400 hover:text-white"}`}
+                  title="Shuffle"
+                >
+                  <FaRandom className="text-xs" />
+                </button>
+              )}
 
               <button 
                 onClick={prevSong} 
@@ -544,16 +574,7 @@ function Player({
 
           {/* RIGHT: AUDIO & EXTRA OPTIONS */}
           <div className="hidden md:flex w-[30%] justify-end items-center gap-3.5">
-            {/* Lyrics / Microphone Icon */}
-            <button 
-              onClick={() => setFullscreen(true)}
-              className="text-zinc-400 hover:text-white p-1 transition-colors"
-              title="Lyrics"
-            >
-              <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-              </svg>
-            </button>
+
             
             {/* Queue Icon */}
             {queueType === "playlist" && (
@@ -604,15 +625,7 @@ function Player({
               </div>
             )}
 
-            {/* Device Icon */}
-            <button 
-              className="text-zinc-400 hover:text-white p-1 transition-colors"
-              title="Connect to a device"
-            >
-              <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              </svg>
-            </button>
+
 
             {/* Volume Icon */}
             <button 
@@ -645,15 +658,7 @@ function Player({
               }}
             />
 
-            {/* PiP Icon */}
-            <button 
-              className="text-zinc-400 hover:text-white p-1 transition-colors"
-              title="Miniplayer"
-            >
-              <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-              </svg>
-            </button>
+
 
             {/* Fullscreen Icon */}
             <button 
