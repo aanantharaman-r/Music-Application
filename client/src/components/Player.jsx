@@ -20,6 +20,7 @@ import {
 
 function Player({
   currentSong,
+  setCurrentSong = () => {},
   nextSong,
   prevSong,
   shuffleSongs = () => {},

@@ -666,6 +666,7 @@ function App() {
         currentSong={currentSong}
         nextSong={nextSong}
         prevSong={prevSong}
+        setCurrentSong={setCurrentSong}
         favorites={favorites}
         setFavorites={setFavorites}
         playlists={playlists}
