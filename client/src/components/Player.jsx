@@ -22,11 +22,16 @@ function Player({
   currentSong,
   nextSong,
   prevSong,
-  shuffleSongs = () => {}
+  shuffleSongs = () => {},
+  favorites = [],
+  setFavorites = () => {},
+  playlists = [],
+  addSongToPlaylist = () => {}
 }) {
 
   const playerRef = useRef(null)
   const audioRef = useRef(null)
+  const optionsRef = useRef(null)
 
   const [playing, setPlaying] = useState(true)
   const [progress, setProgress] = useState(0)
@@ -34,9 +39,31 @@ function Player({
 
   const [volume, setVolume] = useState(100)
   const [muted, setMuted] = useState(false)
-  const [liked, setLiked] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
   const [repeat, setRepeat] = useState(false)
+  const [showOptions, setShowOptions] = useState(false)
+
+  const isFav = currentSong ? favorites.some(f => f.id === currentSong.id) : false
+
+  const toggleFavorite = () => {
+    if (!currentSong) return
+    const exists = favorites.find(f => f.id === currentSong.id)
+    if (exists) {
+      setFavorites(favorites.filter(f => f.id !== currentSong.id))
+    } else {
+      setFavorites([...favorites, currentSong])
+    }
+  }
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (optionsRef.current && !optionsRef.current.contains(event.target)) {
+        setShowOptions(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   // Listen to song change
   useEffect(() => {
@@ -281,14 +308,14 @@ function Player({
               {/* PLAYBACK CONTROL BUTTONS */}
               <div className="flex items-center justify-center gap-4 w-full">
                 <button 
-                  onClick={() => setLiked(!liked)} 
+                  onClick={toggleFavorite} 
                   className={`w-11 h-11 flex items-center justify-center rounded-full border transition-all duration-200 shadow-md active:scale-95 ${
-                    liked 
+                    isFav 
                       ? "bg-red-950/20 border-red-600 text-red-500" 
                       : "bg-zinc-950/40 border-zinc-800/80 text-zinc-400 hover:text-white"
                   }`}
                 >
-                  {liked ? <FaHeart className="text-xs" /> : <FaRegHeart className="text-xs" />}
+                  {isFav ? <FaHeart className="text-xs" /> : <FaRegHeart className="text-xs" />}
                 </button>
  
                 <button 
@@ -366,21 +393,52 @@ function Player({
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-              <button 
-                onClick={() => setLiked(!liked)} 
-                className="text-zinc-400 hover:text-white transition-colors p-1"
-                title={liked ? "Remove from Liked" : "Save to Liked"}
-              >
-                {liked ? (
-                  <svg className="w-4 h-4 text-red-500 fill-current" viewBox="0 0 24 24">
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                  </svg>
-                ) : (
+              <div className="relative" ref={optionsRef}>
+                <button 
+                  onClick={() => setShowOptions(!showOptions)} 
+                  className="text-zinc-400 hover:text-white transition-colors p-1"
+                  title="Add to Favorite or Playlist"
+                >
                   <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
+                </button>
+                
+                {showOptions && (
+                  <div className="absolute bottom-full left-0 mb-2 bg-zinc-950/95 border border-zinc-800 rounded-xl p-2 w-48 shadow-2xl z-[100] backdrop-blur-md animate-in fade-in slide-in-from-bottom-1">
+                    <button
+                      onClick={() => {
+                        toggleFavorite()
+                        setShowOptions(false)
+                      }}
+                      className="w-full text-left text-xs font-semibold px-2 py-1.5 rounded-lg text-zinc-300 hover:bg-violet-600 hover:text-white transition-colors flex items-center gap-2"
+                    >
+                      {isFav ? "❤️ Remove Favorite" : "🤍 Add to Favorite"}
+                    </button>
+                    
+                    {playlists.length > 0 && (
+                      <>
+                        <div className="border-t border-zinc-900 my-1"></div>
+                        <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold p-1.5">Add to Playlist</p>
+                        <div className="max-h-32 overflow-y-auto">
+                          {playlists.map(p => (
+                            <button
+                              key={p.id}
+                              onClick={() => {
+                                addSongToPlaylist?.(p.id, currentSong)
+                                setShowOptions(false)
+                              }}
+                              className="w-full text-left text-xs font-semibold px-2 py-1.5 rounded-lg text-zinc-300 hover:bg-violet-600 hover:text-white transition-colors"
+                            >
+                              📁 {p.name}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
                 )}
-              </button>
+              </div>
             </div>
           </div>
 

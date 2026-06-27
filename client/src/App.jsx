@@ -666,6 +666,10 @@ function App() {
         currentSong={currentSong}
         nextSong={nextSong}
         prevSong={prevSong}
+        favorites={favorites}
+        setFavorites={setFavorites}
+        playlists={playlists}
+        addSongToPlaylist={addSongToPlaylist}
       />
 
       {showAuth && (
