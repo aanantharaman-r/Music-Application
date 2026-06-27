@@ -52,6 +52,7 @@ function Player({
   const [repeat, setRepeat] = useState(false)
   const [showOptions, setShowOptions] = useState(false)
   const [showQueue, setShowQueue] = useState(false)
+  const [showMobileLyrics, setShowMobileLyrics] = useState(false)
 
   const isFav = currentSong ? favorites.some(f => f.id === currentSong.id) : false
 
@@ -233,20 +234,260 @@ function Player({
         onEnded={onEnd}
       />
 
-      {/* FULL SCREEN PLAYER PAGE */}
       {fullscreen && (
         <div 
-          className="fixed inset-0 z-[10000] flex flex-col p-6 md:p-12 overflow-y-auto transition-all duration-500 animate-in fade-in slide-in-from-bottom-12 bg-black rounded-none"
+          className="fixed inset-0 z-[10000] flex flex-col p-6 md:p-12 overflow-y-auto transition-all duration-500 animate-in fade-in slide-in-from-bottom-12 bg-[#050506] rounded-none"
         >
-          {/* Distressed RDR2 Border Frame */}
-          <div className="absolute inset-4 border-2 border-zinc-800/80 pointer-events-none z-50 rounded-[2rem]">
-            <div className="absolute inset-0.5 border border-[#eadaa2]/20 pointer-events-none rounded-[2rem]" />
+ 
+          {/* MOBILE FULLSCREEN MUSIC PLAYER */}
+          <div className="flex-1 flex flex-col justify-between w-full max-w-md mx-auto z-10 lg:hidden py-4">
+            {/* MOBILE HEADER */}
+            <div className="flex items-center justify-between w-full mb-6">
+              <button
+                onClick={() => setFullscreen(false)}
+                className="p-2 text-zinc-400 hover:text-white transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <div className="text-center">
+                <p className="text-[10px] uppercase tracking-[0.25em] text-zinc-500 font-bold">Enjoying From</p>
+                <p className="text-xs font-extrabold text-zinc-300 uppercase tracking-widest mt-0.5">{queueType || "Queue"}</p>
+              </div>
+              <button 
+                onClick={() => setShowQueue(!showQueue)}
+                className="p-2 text-zinc-400 hover:text-white transition-colors relative"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />
+                </svg>
+                
+                {showQueue && (
+                  <div className="absolute bottom-full right-0 mb-2 bg-zinc-950/95 border border-zinc-800 rounded-xl p-2 w-64 shadow-2xl z-[100] backdrop-blur-md animate-in fade-in slide-in-from-bottom-1">
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold p-1.5 border-b border-zinc-900 mb-1">Queue ({currentQueue.length})</p>
+                    <div className="max-h-60 overflow-y-auto flex flex-col gap-1">
+                      {currentQueue.map((song, idx) => {
+                        const isPlaying = currentSong?.id === song.id
+                        return (
+                          <button
+                            key={`${song.id}-${idx}`}
+                            onClick={() => {
+                              setCurrentSong(song)
+                              setCurrentIndex(idx)
+                              setActiveSongId(song.id)
+                              setShowQueue(false)
+                            }}
+                            className={`w-full text-left text-xs font-semibold px-2 py-1.5 rounded-lg flex items-center gap-2 transition-colors ${
+                              isPlaying 
+                                ? "bg-violet-600 text-white" 
+                                : "text-zinc-300 hover:bg-zinc-900 hover:text-white"
+                            }`}
+                          >
+                            <span className="text-[10px] text-zinc-500 w-4 font-mono text-right">{idx + 1}</span>
+                            <img src={song.image} alt="" className="w-6 h-6 rounded object-cover" />
+                            <div className="flex-1 min-w-0">
+                              <p className="truncate text-left">{song.title}</p>
+                              <p className={`text-[10px] truncate text-left ${isPlaying ? "text-violet-200" : "text-zinc-500"}`}>{song.artist}</p>
+                            </div>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </button>
+            </div>
+
+            {/* ALBUM ART - COOL ANIMATED CARD */}
+            <div className="flex-1 flex items-center justify-center my-4">
+              <div className={`relative w-72 h-72 sm:w-80 sm:h-80 rounded-[2rem] overflow-hidden border-2 border-zinc-800 shadow-2xl transition-all duration-700 ${playing ? 'scale-100 rotate-1' : 'scale-[0.96]'}`}>
+                {/* Vinyl overlay backing glow */}
+                <div className={`absolute -inset-1.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-[2rem] blur opacity-30 ${playing ? 'animate-pulse' : 'opacity-10'}`} />
+                <img 
+                  src={currentSong.image} 
+                  alt="" 
+                  className={`relative w-full h-full object-cover z-10 rounded-[2rem] ${playing ? 'rotate-animation' : ''}`}
+                />
+              </div>
+            </div>
+
+            {/* TITLE & ARTIST + FAVORITE BUTTON */}
+            <div className="flex items-center justify-between w-full px-4 mb-4">
+              <div className="min-w-0 pr-6">
+                <h2 className="text-xl font-black text-white truncate leading-snug">
+                  {currentSong.title}
+                </h2>
+                <p className="text-zinc-400 font-bold text-sm mt-1 truncate">
+                  {currentSong.artist}
+                </p>
+              </div>
+              <button 
+                onClick={toggleFavorite} 
+                className={`text-xl transition-all duration-200 ${isFav ? "text-rose-500 scale-110" : "text-zinc-400 hover:text-white"}`}
+              >
+                {isFav ? <FaHeart /> : <FaRegHeart />}
+              </button>
+            </div>
+
+            {/* PROGRESS SLIDER */}
+            <div className="w-full px-4 mb-6">
+              <div className="relative">
+                <input
+                  type="range"
+                  min="0"
+                  max={duration || 100}
+                  value={progress}
+                  onChange={(e) => {
+                    const t = Number(e.target.value)
+                    if (currentSong.provider === "jiosaavn") {
+                      if (audioRef.current) audioRef.current.currentTime = t
+                    } else {
+                      playerRef.current?.seekTo(t)
+                    }
+                    setProgress(t)
+                  }}
+                  className="w-full custom-slider h-1 z-10"
+                  style={{
+                    background: `linear-gradient(to right, #ffffff 0%, #ffffff ${progressPercent}%, rgba(255,255,255,0.1) ${progressPercent}%, rgba(255,255,255,0.1) 100%)`
+                  }}
+                />
+              </div>
+              <div className="flex justify-between items-center mt-2.5 text-[10px] text-zinc-500 font-mono font-bold">
+                <span>{formatTime(progress)}</span>
+                <span>{formatTime(duration)}</span>
+              </div>
+            </div>
+
+            {/* CONTROLS BUTTONS SECTION */}
+            <div className="w-full px-4 flex flex-col gap-6 mb-4">
+              {/* PRIMARY CONTROLS */}
+              <div className="flex items-center justify-between w-full">
+                {/* Sleep Timer / Options Icon */}
+                <button 
+                  onClick={() => setShowOptions(!showOptions)}
+                  className="text-zinc-400 hover:text-white p-2 transition-colors relative"
+                >
+                  <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  
+                  {showOptions && (
+                    <div className="absolute bottom-full left-0 mb-2 bg-zinc-950/95 border border-zinc-800 rounded-xl p-2 w-48 shadow-2xl z-[100] backdrop-blur-md animate-in fade-in slide-in-from-bottom-1">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggleFavorite()
+                          setShowOptions(false)
+                        }}
+                        className="w-full text-left text-xs font-semibold px-2 py-1.5 rounded-lg text-zinc-300 hover:bg-violet-600 hover:text-white transition-colors flex items-center gap-2"
+                      >
+                        {isFav ? "❤️ Remove Favorite" : "🤍 Add to Favorite"}
+                      </button>
+                      
+                      {playlists.length > 0 && (
+                        <>
+                          <div className="border-t border-zinc-900 my-1"></div>
+                          <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold p-1.5">Add to Playlist</p>
+                          <div className="max-h-32 overflow-y-auto">
+                            {playlists.map(p => (
+                              <button
+                                key={p.id}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  addSongToPlaylist?.(p.id, currentSong)
+                                  setShowOptions(false)
+                                }}
+                                className="w-full text-left text-xs font-semibold px-2 py-1.5 rounded-lg text-zinc-300 hover:bg-violet-600 hover:text-white transition-colors"
+                              >
+                                📁 {p.name}
+                              </button>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </button>
+
+                {/* Previous */}
+                <button 
+                  onClick={prevSong} 
+                  className="text-white p-2 active:scale-90 transition-transform"
+                >
+                  <FaBackward className="text-xl" />
+                </button>
+
+                {/* Main Play/Pause */}
+                <button
+                  onClick={togglePlay}
+                  className="w-16 h-16 rounded-full flex items-center justify-center bg-red-600 hover:bg-red-500 text-white shadow-[0_0_20px_rgba(220,38,38,0.4)] active:scale-95 transition-all"
+                >
+                  {playing ? <FaPause className="text-lg" /> : <FaPlay className="text-lg ml-1" />}
+                </button>
+
+                {/* Next */}
+                <button 
+                  onClick={nextSong} 
+                  className="text-white p-2 active:scale-90 transition-transform"
+                >
+                  <FaForward className="text-xl" />
+                </button>
+
+                {/* Shuffle */}
+                <button 
+                  onClick={() => {
+                    setIsShuffle(!isShuffle)
+                    showToast(isShuffle ? "Shuffle Off" : "Shuffle On")
+                  }}
+                  className={`p-2 transition-colors ${isShuffle ? "text-violet-500" : "text-zinc-400"}`}
+                >
+                  <FaRandom className="text-lg" />
+                </button>
+              </div>
+
+              {/* SECONDARY CONTROLS */}
+              <div className="flex items-center justify-between w-full px-8">
+                {/* Loop */}
+                <button 
+                  onClick={() => setRepeat(!repeat)}
+                  className={`p-2 transition-colors ${repeat ? "text-violet-500" : "text-zinc-400"}`}
+                >
+                  <svg className="w-5.5 h-5.5 fill-current" viewBox="0 0 24 24">
+                    <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
+                  </svg>
+                </button>
+
+                {/* Lyrics Toggle */}
+                <button 
+                  onClick={() => setShowMobileLyrics(!showMobileLyrics)}
+                  className={`p-2 transition-colors ${showMobileLyrics ? "text-violet-500" : "text-zinc-400"}`}
+                >
+                  <FaMusic className="text-lg" />
+                </button>
+
+                {/* Provider Badge */}
+                <span className="text-[10px] px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-500 font-black uppercase tracking-wider">
+                  {currentSong.provider === "jiosaavn" ? "JS" : "YT"}
+                </span>
+              </div>
+            </div>
+
+            {/* Bottom lyrics slide-up overlay */}
+            {showMobileLyrics && (
+              <div className="fixed inset-x-0 bottom-0 top-[20%] bg-[#080809]/98 border-t border-zinc-800/80 rounded-t-[2.5rem] z-50 p-6 flex flex-col animate-in slide-in-from-bottom duration-300 backdrop-blur-xl">
+                <div className="w-12 h-1 bg-zinc-800 rounded-full mx-auto mb-6" onClick={() => setShowMobileLyrics(false)} />
+                <div className="flex-1 overflow-y-auto">
+                  <Lyrics currentSong={currentSong} />
+                </div>
+              </div>
+            )}
           </div>
  
-          {/* HEADER */}
-          <div className="flex items-center justify-between w-full border-b-2 border-zinc-800/80 pb-6 mb-8 z-10">
+          {/* DESKTOP HEADER */}
+          <div className="hidden lg:flex items-center justify-between w-full border-b border-zinc-800/50 pb-6 mb-8 z-10">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-full bg-red-950/40 border border-red-900/50 text-red-500">
+              <div className="p-2 rounded-full bg-violet-950/40 border border-violet-900/40 text-violet-400">
                 <FaMusic className="text-sm" />
               </div>
               <span className="text-xs uppercase tracking-[0.2em] font-black text-zinc-400">Now Playing</span>
@@ -254,27 +495,27 @@ function Player({
             
             <button
               onClick={() => setFullscreen(false)}
-              className="p-3.5 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 hover:text-white hover:border-red-600 hover:scale-105 active:scale-95 transition-all duration-200 shadow-md"
+              className="p-3.5 rounded-full bg-zinc-950 border border-zinc-850 text-zinc-300 hover:text-white hover:border-violet-650 hover:scale-105 active:scale-95 transition-all duration-200 shadow-md"
             >
               <FaCompress className="text-sm" />
             </button>
           </div>
- 
-          {/* BODY: SPLIT VIEW FOR HUGE ALBUM ART & LYRICS */}
-          <div className="flex-1 flex flex-col lg:flex-row items-stretch justify-center max-w-5xl mx-auto w-full mb-6 gap-6 z-10 overflow-y-auto lg:overflow-hidden">
+  
+          {/* DESKTOP BODY: SPLIT VIEW FOR HUGE ALBUM ART & LYRICS */}
+          <div className="hidden lg:flex flex-1 flex-col lg:flex-row items-stretch justify-center max-w-5xl mx-auto w-full mb-6 gap-6 z-10 overflow-y-auto lg:overflow-hidden">
             
             {/* LEFT COLUMN: HUGE ALBUM ART CARD & TITLES */}
-            <div className="w-full lg:w-[48%] flex flex-col items-center justify-center p-6 lg:p-8 border border-zinc-800/60 bg-black rounded-[2rem] shadow-xl gap-4 flex-shrink-0">
+            <div className="w-full lg:w-[48%] flex flex-col items-center justify-center p-6 lg:p-8 border border-zinc-900 bg-zinc-950/40 rounded-[2.5rem] shadow-2xl gap-4 flex-shrink-0">
               
               {/* Music Card Frame */}
-              <div className="relative w-52 h-52 md:w-64 md:h-64 rounded-[1.5rem] overflow-hidden border-4 border-zinc-800 shadow-lg flex-shrink-0 group">
+              <div className="relative w-52 h-52 md:w-64 md:h-64 rounded-[2rem] overflow-hidden border border-zinc-800 shadow-2xl flex-shrink-0 group">
                 <img 
                   src={currentSong.image} 
                   alt="" 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                <span className="absolute bottom-4 left-4 text-[9px] px-2.5 py-1 rounded-full bg-red-600 border border-red-500/30 text-white font-black uppercase tracking-widest shadow-md">
+                <span className="absolute bottom-4 left-4 text-[9px] px-2.5 py-1 rounded-full bg-violet-600 border border-violet-500/30 text-white font-black uppercase tracking-widest shadow-md">
                   {currentSong.provider} Mode
                 </span>
               </div>
@@ -371,7 +612,7 @@ function Player({
                     <FaRandom className="text-xs" />
                   </button>
                 )}
-
+ 
                 <button 
                   onClick={() => setRepeat(!repeat)} 
                   className={`w-11 h-11 flex items-center justify-center rounded-full border transition-all duration-200 shadow-md active:scale-95 ${
@@ -395,34 +636,61 @@ function Player({
             </div>
  
           </div>
-
+ 
         </div>
       )}
 
       {/* BOTTOM PLAYER BAR */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#070708]/98 border-t border-zinc-900/80 px-4 md:px-6 py-3 flex items-center justify-between shadow-2xl transition-all duration-300">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#070708]/98 border-t border-zinc-900/80 px-4 md:px-6 py-3 flex flex-col md:flex-row md:items-center justify-between shadow-2xl transition-all duration-300">
+        
+        {/* Interactive tracking line at the top edge for mobile */}
+        <div className="absolute top-0 left-0 right-0 h-3 md:hidden z-30 group/slider">
+          <input
+            type="range"
+            min="0"
+            max={duration || 100}
+            value={progress}
+            onChange={(e) => {
+              const t = Number(e.target.value)
+              if (currentSong.provider === "jiosaavn") {
+                if (audioRef.current) audioRef.current.currentTime = t
+              } else {
+                playerRef.current?.seekTo(t)
+              }
+              setProgress(t)
+            }}
+            className="absolute -top-1.5 left-0 w-full h-5 opacity-0 cursor-pointer z-40 touch-none"
+          />
+          <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-zinc-800/80 group-hover/slider:h-[4px] transition-all duration-200">
+            <div 
+              className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 transition-all duration-100" 
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+        </div>
+
         <div className="flex flex-row items-center justify-between w-full">
 
           {/* LEFT: SONG DETAILS */}
-          <div className="flex items-center w-[40%] md:w-[30%] min-w-0">
+          <div className="flex items-center flex-1 md:flex-initial md:w-[30%] min-w-0">
             <img
               src={currentSong.image}
               alt=""
               onClick={() => setFullscreen(true)}
-              className="w-14 h-14 object-cover flex-shrink-0 cursor-pointer hover:opacity-85 transition-opacity"
+              className="w-12 h-12 md:w-14 md:h-14 object-cover flex-shrink-0 cursor-pointer hover:opacity-85 transition-opacity rounded-lg"
             />
 
-            <div className="min-w-0 flex-1 ml-4 cursor-pointer" onClick={() => setFullscreen(true)}>
-              <h2 className="font-bold text-white text-sm truncate leading-snug hover:underline">
+            <div className="min-w-0 flex-1 ml-3 cursor-pointer" onClick={() => setFullscreen(true)}>
+              <h2 className="font-bold text-white text-xs md:text-sm truncate leading-snug hover:underline">
                 {currentSong.title}
               </h2>
-              <p className="text-zinc-400 text-xs truncate mt-0.5 hover:underline">
+              <p className="text-zinc-400 text-[10px] md:text-xs truncate mt-0.5 hover:underline">
                 {currentSong.artist}
               </p>
             </div>
 
-            {/* ACTION BUTTONS: Cross & Plus Circle */}
-            <div className="flex items-center gap-3.5 ml-4">
+            {/* ACTION BUTTONS */}
+            <div className="hidden sm:flex items-center gap-3.5 ml-4">
               <button 
                 onClick={() => setCurrentSong(null)} 
                 className="text-zinc-400 hover:text-white transition-colors p-1"
@@ -482,7 +750,7 @@ function Player({
           </div>
 
           {/* CENTER: PLAYBACK CONTROLS & PROGRESS */}
-          <div className="w-[50%] md:w-[40%] flex flex-col items-center">
+          <div className="flex md:flex-col items-center justify-end md:justify-center md:w-[40%] gap-3 md:gap-0">
             {currentSong.provider !== "jiosaavn" && (
               <YouTube
                 videoId={currentSong.file}
@@ -492,8 +760,8 @@ function Player({
               />
             )}
 
-            {/* CONTROLS */}
-            <div className="flex items-center gap-5">
+            {/* CONTROLS - Desktop */}
+            <div className="hidden md:flex items-center gap-5">
               {queueType === "playlist" && (
                 <button 
                   onClick={() => {
@@ -543,8 +811,8 @@ function Player({
               </button>
             </div>
 
-            {/* PROGRESS BAR */}
-            <div className="flex items-center gap-3.5 w-full mt-1.5">
+            {/* PROGRESS BAR - Desktop */}
+            <div className="hidden md:flex items-center gap-3.5 w-full mt-1.5">
               <span className="text-[10px] font-medium text-zinc-500 min-w-[28px] text-right font-mono select-none">
                 {formatTime(progress)}
               </span>
@@ -570,6 +838,33 @@ function Player({
               <span className="text-[10px] font-medium text-zinc-500 min-w-[28px] font-mono select-none">
                 {formatTime(duration)}
               </span>
+            </div>
+
+            {/* Mobile compact controls */}
+            <div className="flex md:hidden items-center gap-4">
+              <button
+                onClick={togglePlay}
+                className="w-9 h-9 rounded-full flex items-center justify-center bg-white text-black shadow-md active:scale-90 transition-transform"
+                title={playing ? "Pause" : "Play"}
+              >
+                {playing ? <FaPause className="text-[10px]" /> : <FaPlay className="text-[10px] ml-0.5" />}
+              </button>
+              <button 
+                onClick={nextSong} 
+                className="text-zinc-400 hover:text-white p-1 transition-colors"
+                title="Next"
+              >
+                <FaForward className="text-base" />
+              </button>
+              <button 
+                onClick={() => setFullscreen(true)}
+                className="text-zinc-400 hover:text-white p-1 transition-colors"
+                title="Maximize"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-5V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+                </svg>
+              </button>
             </div>
           </div>
 

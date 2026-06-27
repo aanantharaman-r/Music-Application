@@ -505,6 +505,18 @@ function App() {
         </div>
         
         <div className="flex md:hidden items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-900 backdrop-blur-md sticky top-0 z-30">
+          {/* LEFT: MOBILE MENU TRIGGER */}
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setMenuOpen(true)}
+              className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-red-500 hover:bg-zinc-800 transition"
+            >
+              ☰
+            </button>
+            <img src={logo} alt="Logo" className="w-8 h-8 rounded-lg object-cover hidden sm:block" />
+          </div>
+
+          {/* RIGHT: PROFILE DROPDOWN */}
           <div className="relative" ref={mobileProfileDropdownRef}>
             <button 
               onClick={() => setShowProfileDropdown(!showProfileDropdown)}
@@ -519,7 +531,7 @@ function App() {
             </button>
             
             {showProfileDropdown && (
-              <div className="absolute left-0 top-9 bg-zinc-950/95 border border-zinc-800 rounded-xl p-1.5 w-32 shadow-2xl z-30 backdrop-blur-md">
+              <div className="absolute right-0 top-9 bg-zinc-950/95 border border-zinc-800 rounded-xl p-1.5 w-32 shadow-2xl z-30 backdrop-blur-md">
                 {user ? (
                   <button
                     onClick={() => {
@@ -543,15 +555,6 @@ function App() {
                 )}
               </div>
             )}
-          </div>
-          <div className="flex items-center gap-2">
-            <img src={logo} alt="Logo" className="w-8 h-8 rounded-lg object-cover hidden sm:block" />
-            <button 
-              onClick={() => setMenuOpen(true)}
-              className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-red-500 hover:bg-zinc-800 transition"
-            >
-              ☰
-            </button>
           </div>
         </div>
 
@@ -604,17 +607,17 @@ function App() {
 
               {/* CURRENT PLAY ACTIVE GLOW VISUALIZER (Top of Curated Mixes) */}
               {currentSong && (
-                <div className="mb-10 p-6 rounded-2xl bg-gradient-to-r from-zinc-900/40 to-red-950/20 border border-zinc-900 backdrop-blur-md flex items-center justify-between w-full shadow-xl">
-                  <div className="flex items-center gap-4">
-                    <img src={currentSong.image} alt="" className="w-16 h-16 rounded-xl object-cover glow-pulse" />
-                    <div>
-                      <p className="text-xs uppercase tracking-widest text-red-500 font-bold">Now Playing</p>
-                      <h4 className="font-extrabold text-white text-lg truncate max-w-md mt-0.5">{currentSong.title}</h4>
-                      <p className="text-zinc-400 text-xs mt-0.5">{currentSong.artist}</p>
+                <div className="mb-10 p-4 md:p-6 rounded-2xl bg-gradient-to-r from-zinc-900/40 to-red-950/20 border border-zinc-900 backdrop-blur-md flex items-center justify-between w-full shadow-xl gap-4">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <img src={currentSong.image} alt="" className="w-12 h-12 md:w-16 md:h-16 rounded-xl object-cover glow-pulse flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-[10px] md:text-xs uppercase tracking-widest text-red-500 font-bold">Now Playing</p>
+                      <h4 className="font-extrabold text-white text-sm md:text-lg truncate max-w-[160px] sm:max-w-xs md:max-w-md mt-0.5">{currentSong.title}</h4>
+                      <p className="text-zinc-400 text-[10px] md:text-xs truncate mt-0.5">{currentSong.artist}</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-end gap-[4px] h-12">
+                  <div className="flex items-end gap-[3px] md:gap-[4px] h-8 md:h-12 flex-shrink-0">
                     <div className="w-1.5 bg-gradient-to-t from-red-600 to-rose-500 rounded-full visualizer-bar" style={{ animationDelay: '0.1s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
                     <div className="w-1.5 bg-gradient-to-t from-red-600 to-rose-500 rounded-full visualizer-bar-fast" style={{ animationDelay: '0.3s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
                     <div className="w-1.5 bg-gradient-to-t from-red-600 to-rose-500 rounded-full visualizer-bar-slow" style={{ animationDelay: '0.5s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
