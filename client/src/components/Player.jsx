@@ -31,7 +31,8 @@ function Player({
   currentQueue = [],
   queueType = "",
   setCurrentIndex = () => {},
-  setActiveSongId = () => {}
+  setActiveSongId = () => {},
+  showToast = () => {}
 }) {
 
   const playerRef = useRef(null)
@@ -57,8 +58,10 @@ function Player({
     const exists = favorites.find(f => f.id === currentSong.id)
     if (exists) {
       setFavorites(favorites.filter(f => f.id !== currentSong.id))
+      showToast(`Removed "${currentSong.title}" from Favorites`)
     } else {
       setFavorites([...favorites, currentSong])
+      showToast(`Added "${currentSong.title}" to Favorites`)
     }
   }
 

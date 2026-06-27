@@ -40,6 +40,18 @@ function App() {
   const [favorites, setFavorites] = useState([])
   const [playlists, setPlaylists] = useState([])
   const [greeting, setGreeting] = useState("Hello")
+  
+  const [toast, setToast] = useState(null)
+  const [toastTimeoutId, setToastTimeoutId] = useState(null)
+
+  const showToast = (message, type = "success") => {
+    if (toastTimeoutId) clearTimeout(toastTimeoutId)
+    setToast({ message, type })
+    const id = setTimeout(() => {
+      setToast(null)
+    }, 3000)
+    setToastTimeoutId(id)
+  }
 
 
   // Curated quick mixes for Home Page (JioSaavn queries)
@@ -108,25 +120,31 @@ function App() {
         songs: res.data.songs || []
       }
       setPlaylists([...playlists, newP])
+      showToast(`Playlist "${name}" created`)
     } catch (err) {
       console.error("Error creating playlist:", err)
+      showToast("Failed to create playlist", "error")
     }
   }
 
   const deletePlaylist = async (id) => {
     if (!token) return
+    const playlistName = playlists.find(p => p.id === id)?.name || "Playlist"
     try {
       await axios.delete(`${API_URL}/playlists/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setPlaylists(playlists.filter(p => p.id !== id))
+      showToast(`Deleted playlist "${playlistName}"`)
     } catch (err) {
       console.error("Error deleting playlist:", err)
+      showToast("Failed to delete playlist", "error")
     }
   }
 
   const addSongToPlaylist = async (playlistId, song) => {
     if (!token) return
+    const playlistName = playlists.find(p => p.id === playlistId)?.name || "Playlist"
     try {
       const res = await axios.put(`${API_URL}/playlists/${playlistId}/songs`, { song }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -141,13 +159,16 @@ function App() {
         }
         return p
       }))
+      showToast(`"${song.title}" added to "${playlistName}"`)
     } catch (err) {
       console.error("Error adding song to playlist:", err)
+      showToast("Failed to add song to playlist", "error")
     }
   }
 
   const removeSongFromPlaylist = async (playlistId, songId) => {
     if (!token) return
+    const playlistName = playlists.find(p => p.id === playlistId)?.name || "Playlist"
     try {
       const res = await axios.delete(`${API_URL}/playlists/${playlistId}/songs/${songId}`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -162,8 +183,10 @@ function App() {
         }
         return p
       }))
+      showToast(`Song removed from "${playlistName}"`)
     } catch (err) {
       console.error("Error removing song from playlist:", err)
+      showToast("Failed to remove song from playlist", "error")
     }
   }
 
@@ -682,6 +705,7 @@ function App() {
         queueType={queueType}
         setCurrentIndex={setCurrentIndex}
         setActiveSongId={setActiveSongId}
+        showToast={showToast}
       />
 
       {showAuth && (
@@ -689,6 +713,18 @@ function App() {
           onAuthSuccess={handleAuthSuccess} 
           onClose={() => setShowAuth(false)} 
         />
+      )}
+
+      {toast && (
+        <div className="fixed top-6 right-6 z-[100000] bg-zinc-950/90 border border-violet-500/30 rounded-2xl px-5 py-3 shadow-[0_0_25px_rgba(139,92,246,0.2)] animate-in fade-in slide-in-from-top-6 flex items-center gap-3.5 backdrop-blur-lg">
+          <div className="w-8 h-8 rounded-full bg-violet-600/15 border border-violet-500/30 flex items-center justify-center text-sm">
+            {toast.type === "success" ? "🎵" : "⚠️"}
+          </div>
+          <div>
+            <p className="text-xs font-black uppercase tracking-wider text-zinc-500">Notification</p>
+            <p className="text-xs font-extrabold text-white mt-0.5">{toast.message}</p>
+          </div>
+        </div>
       )}
     </div>
   )
