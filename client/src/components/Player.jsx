@@ -27,12 +27,17 @@ function Player({
   favorites = [],
   setFavorites = () => {},
   playlists = [],
-  addSongToPlaylist = () => {}
+  addSongToPlaylist = () => {},
+  currentQueue = [],
+  queueType = "",
+  setCurrentIndex = () => {},
+  setActiveSongId = () => {}
 }) {
 
   const playerRef = useRef(null)
   const audioRef = useRef(null)
   const optionsRef = useRef(null)
+  const queueRef = useRef(null)
 
   const [playing, setPlaying] = useState(true)
   const [progress, setProgress] = useState(0)
@@ -43,6 +48,7 @@ function Player({
   const [fullscreen, setFullscreen] = useState(false)
   const [repeat, setRepeat] = useState(false)
   const [showOptions, setShowOptions] = useState(false)
+  const [showQueue, setShowQueue] = useState(false)
 
   const isFav = currentSong ? favorites.some(f => f.id === currentSong.id) : false
 
@@ -60,6 +66,9 @@ function Player({
     const handleClickOutside = (event) => {
       if (optionsRef.current && !optionsRef.current.contains(event.target)) {
         setShowOptions(false)
+      }
+      if (queueRef.current && !queueRef.current.contains(event.target)) {
+        setShowQueue(false)
       }
     }
     document.addEventListener("mousedown", handleClickOutside)
@@ -544,14 +553,53 @@ function Player({
             </button>
             
             {/* Queue Icon */}
-            <button 
-              className="text-zinc-400 hover:text-white p-1 transition-colors"
-              title="Queue"
-            >
-              <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h7" />
-              </svg>
-            </button>
+            {queueType === "playlist" && (
+              <div className="relative" ref={queueRef}>
+                <button 
+                  onClick={() => setShowQueue(!showQueue)}
+                  className={`p-1 transition-colors ${showQueue ? "text-violet-500" : "text-zinc-400 hover:text-white"}`}
+                  title="Queue"
+                >
+                  <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h7" />
+                  </svg>
+                </button>
+
+                {showQueue && (
+                  <div className="absolute bottom-full right-0 mb-2 bg-zinc-950/95 border border-zinc-800 rounded-xl p-2 w-64 shadow-2xl z-[100] backdrop-blur-md animate-in fade-in slide-in-from-bottom-1">
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold p-1.5 border-b border-zinc-900 mb-1">Queue ({currentQueue.length})</p>
+                    <div className="max-h-60 overflow-y-auto flex flex-col gap-1">
+                      {currentQueue.map((song, idx) => {
+                        const isPlaying = currentSong?.id === song.id
+                        return (
+                          <button
+                            key={`${song.id}-${idx}`}
+                            onClick={() => {
+                              setCurrentSong(song)
+                              setCurrentIndex(idx)
+                              setActiveSongId(song.id)
+                              setShowQueue(false)
+                            }}
+                            className={`w-full text-left text-xs font-semibold px-2 py-1.5 rounded-lg flex items-center gap-2 transition-colors ${
+                              isPlaying 
+                                ? "bg-violet-600 text-white" 
+                                : "text-zinc-300 hover:bg-zinc-900 hover:text-white"
+                            }`}
+                          >
+                            <span className="text-[10px] text-zinc-500 w-4 font-mono text-right">{idx + 1}</span>
+                            <img src={song.image} alt="" className="w-6 h-6 rounded object-cover" />
+                            <div className="flex-1 min-w-0">
+                              <p className="truncate text-left">{song.title}</p>
+                              <p className={`text-[10px] truncate text-left ${isPlaying ? "text-violet-200" : "text-zinc-500"}`}>{song.artist}</p>
+                            </div>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Device Icon */}
             <button 

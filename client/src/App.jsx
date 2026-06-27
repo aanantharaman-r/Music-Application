@@ -28,6 +28,7 @@ function App() {
   const [activeSongId, setActiveSongId] = useState(null)
   const [currentIndex, setCurrentIndex] = useState(-1)
   const [currentQueue, setCurrentQueue] = useState([])
+  const [queueType, setQueueType] = useState("")
 
   const [search, setSearch] = useState("tamil hits")
   const [provider, setProvider] = useState("jiosaavn") // Default to JioSaavn for premium audio streams
@@ -265,6 +266,7 @@ function App() {
     setCurrentIndex(randomIndex)
     setActiveSongId(favorites[randomIndex].id)
     setCurrentQueue(favorites)
+    setQueueType("favorites")
   }
 
   // Fetch a mix & play first track instantly (JioSaavn API)
@@ -288,6 +290,7 @@ function App() {
         setCurrentIndex(0)
         setActiveSongId(formatted[0].id)
         setCurrentQueue(formatted)
+        setQueueType("home")
       }
     } catch (err) {
       console.log(err)
@@ -547,6 +550,7 @@ function App() {
                           setCurrentIndex(i)
                           setActiveSongId(song.id)
                           setCurrentQueue(homeSongs)
+                          setQueueType("home")
                         }}
                         isActive={activeSongId === song.id}
                         onFav={() => {
@@ -603,6 +607,7 @@ function App() {
               setCurrentSong={(song) => {
                 setCurrentSong(song)
                 setCurrentQueue(songs)
+                setQueueType("search")
               }}
               setCurrentIndex={setCurrentIndex}
               setActiveSongId={setActiveSongId}
@@ -625,6 +630,7 @@ function App() {
                 const activeP = playlists.find(p => p.songs.some(s => s.id === song.id))
                 if (activeP) {
                   setCurrentQueue(activeP.songs)
+                  setQueueType("playlist")
                 }
               }}
               setActiveSongId={setActiveSongId}
@@ -648,6 +654,7 @@ function App() {
               setCurrentSong={(song) => {
                 setCurrentSong(song)
                 setCurrentQueue(favorites)
+                setQueueType("favorites")
               }}
               setActiveSongId={setActiveSongId}
               setCurrentIndex={setCurrentIndex}
@@ -671,6 +678,10 @@ function App() {
         setFavorites={setFavorites}
         playlists={playlists}
         addSongToPlaylist={addSongToPlaylist}
+        currentQueue={currentQueue}
+        queueType={queueType}
+        setCurrentIndex={setCurrentIndex}
+        setActiveSongId={setActiveSongId}
       />
 
       {showAuth && (
