@@ -16,7 +16,8 @@ function Search({
   provider,
   setProvider,
   playlists = [],
-  addSongToPlaylist
+  addSongToPlaylist,
+  isPlaying
 }) {
 
   const categories = ["Tamil Hits", "Lo-Fi Beats", "Synthwave", "Coding Beats", "Acoustic Pop", "Rock Hits"]
@@ -42,7 +43,7 @@ function Search({
               onClick={() => handleProviderChange("jiosaavn")}
               className={`px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
                 provider === "jiosaavn"
-                  ? "bg-red-600 text-white shadow"
+                  ? "bg-violet-600 text-white shadow"
                   : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
@@ -52,7 +53,7 @@ function Search({
               onClick={() => handleProviderChange("youtube")}
               className={`px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
                 provider === "youtube"
-                  ? "bg-red-600 text-white shadow"
+                  ? "bg-violet-600 text-white shadow"
                   : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
@@ -60,14 +61,13 @@ function Search({
             </button>
           </div>
         </div>
-        
         <div className="flex gap-3 items-center w-full max-w-4xl">
-          <div className="flex items-center gap-3 w-full bg-zinc-900/50 backdrop-blur-md border border-zinc-800/80 rounded-2xl px-5 py-4 focus-within:border-red-600/80 focus-within:ring-2 focus-within:ring-red-950 transition-all duration-300">
+          <div className="flex items-center gap-3 w-full bg-zinc-900/50 backdrop-blur-md border border-zinc-800/80 rounded-2xl px-5 py-4 focus-within:border-violet-600/80 focus-within:ring-2 focus-within:ring-violet-950 transition-all duration-300">
             <FaSearch className="text-zinc-500 flex-shrink-0" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder={`Search songs, artists, playlists on ${provider === "jiosaavn" ? "JioSaavn" : "YouTube"}...`}
+              placeholder="What do you want to Tune..?"
               spellCheck={false}
               autoComplete="off"
               className="w-full min-w-0 flex-1 bg-transparent outline-none border-none text-white text-base leading-normal placeholder-zinc-500"
@@ -75,7 +75,7 @@ function Search({
           </div>
           <button
             onClick={() => fetchSongs(search, provider)}
-            className="flex-shrink-0 bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 px-7 py-4 rounded-2xl font-bold tracking-wide shadow-lg shadow-red-900/30 transition-all duration-300 hover:scale-[1.02]"
+            className="flex-shrink-0 bg-gradient-to-r from-violet-600 to-fuchsia-700 hover:from-violet-500 hover:to-fuchsia-600 px-7 py-4 rounded-2xl font-bold tracking-wide shadow-lg shadow-violet-900/30 transition-all duration-300 hover:scale-[1.02]"
           >
             Search
           </button>
@@ -92,7 +92,7 @@ function Search({
               }}
               className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all duration-300 ${
                 search.toLowerCase() === cat.toLowerCase()
-                  ? "bg-red-600 border-red-500 text-white shadow-md shadow-red-900/30"
+                  ? "bg-violet-600 border-violet-500 text-white shadow-md shadow-violet-900/30"
                   : "bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-white"
               }`}
             >
@@ -145,6 +145,7 @@ function Search({
                 isFav={favorites.some(f => f.id === song.id)}
                 playlists={playlists}
                 addSongToPlaylist={addSongToPlaylist}
+                isPlaying={isPlaying}
               />
             ))}
           </div>

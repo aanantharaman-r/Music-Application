@@ -11,7 +11,8 @@ function PlaylistView({
   setCurrentIndex,
   activeSongId,
   onFav,
-  favorites
+  favorites,
+  isPlaying
 }) {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -121,6 +122,7 @@ function PlaylistView({
               // Custom action to remove from playlist
               removeLabel="Remove from playlist"
               onRemove={() => removeSongFromPlaylist(playlist.id, song.id)}
+              isPlaying={isPlaying}
             />
           ))}
         </div>

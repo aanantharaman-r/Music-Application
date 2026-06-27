@@ -33,7 +33,9 @@ function Player({
   setActiveSongId = () => {},
   showToast = () => {},
   isShuffle = false,
-  setIsShuffle = () => {}
+  setIsShuffle = () => {},
+  playing,
+  setPlaying
 }) {
 
   const playerRef = useRef(null)
@@ -41,7 +43,6 @@ function Player({
   const optionsRef = useRef(null)
   const queueRef = useRef(null)
 
-  const [playing, setPlaying] = useState(true)
   const [progress, setProgress] = useState(0)
   const [duration, setDuration] = useState(0)
 

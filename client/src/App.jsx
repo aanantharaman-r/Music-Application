@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { FaChartBar, FaHeart, FaPlay, FaRandom, FaUser, FaMusic } from "react-icons/fa"
 import { Routes, Route, Link } from "react-router-dom"
 import axios from "axios"
@@ -24,6 +24,7 @@ function App() {
   const [songs, setSongs] = useState([]) // Search results
   const [homeSongs, setHomeSongs] = useState([]) // Home feed
   const [currentSong, setCurrentSong] = useState(null)
+  const [isPlaying, setIsPlaying] = useState(false)
 
   const [activeSongId, setActiveSongId] = useState(null)
   const [currentIndex, setCurrentIndex] = useState(-1)
@@ -31,7 +32,7 @@ function App() {
   const [queueType, setQueueType] = useState("")
   const [isShuffle, setIsShuffle] = useState(false)
 
-  const [search, setSearch] = useState("tamil hits")
+  const [search, setSearch] = useState("")
   const [provider, setProvider] = useState("jiosaavn") // Default to JioSaavn for premium audio streams
   const [loading, setLoading] = useState(false)
   const [homeLoading, setHomeLoading] = useState(false)
@@ -42,6 +43,23 @@ function App() {
   const [playlists, setPlaylists] = useState([])
   const [greeting, setGreeting] = useState("Hello")
   
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false)
+  const profileDropdownRef = useRef(null)
+  const mobileProfileDropdownRef = useRef(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) &&
+        (mobileProfileDropdownRef.current && !mobileProfileDropdownRef.current.contains(event.target))
+      ) {
+        setShowProfileDropdown(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
   const [toast, setToast] = useState(null)
   const [toastTimeoutId, setToastTimeoutId] = useState(null)
 
@@ -67,9 +85,10 @@ function App() {
   // Set greeting based on local time
   useEffect(() => {
     const hours = new Date().getHours()
-    if (hours < 12) setGreeting("Good morning")
-    else if (hours < 18) setGreeting("Good afternoon")
-    else setGreeting("Good evening")
+    if (hours >= 5 && hours < 12) setGreeting("Good morning")
+    else if (hours >= 12 && hours < 17) setGreeting("Good afternoon")
+    else if (hours >= 17 && hours < 21) setGreeting("Good evening")
+    else setGreeting("Good night")
   }, [])
 
   // Load favorites & playlists
@@ -350,6 +369,7 @@ function App() {
     localStorage.removeItem("aj-token")
     localStorage.removeItem("aj-user")
     setCurrentSong(null)
+    setIsPlaying(false)
     setCurrentQueue([])
     setActiveSongId(null)
   }
@@ -384,8 +404,6 @@ function App() {
               alt="Logo" 
               className="relative w-32 h-32 rounded-full object-cover shadow-2xl border-[3px] border-zinc-900/80 z-10"
             />
-            {/* Inner record hole */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-zinc-950 rounded-full border border-zinc-800 z-20"></div>
           </div>
 
           <div className="flex flex-col items-center gap-3 mt-4">
@@ -440,39 +458,90 @@ function App() {
       <div className="flex-1 flex flex-col h-screen overflow-y-auto z-10 pb-32">
         
         {/* DESKTOP/MAIN HEADER */}
-        <div className="hidden md:flex items-center justify-between px-8 py-4 bg-zinc-950/40 backdrop-blur-md sticky top-0 z-30 border-b border-zinc-900/50">
-          <div className="flex items-center gap-3">
-            <button className="flex items-center justify-center w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition-colors group">
-              <FaUser className="text-lg group-hover:scale-110 transition-transform" />
+        <div className="hidden md:flex items-center justify-end px-8 py-4 bg-zinc-950/40 backdrop-blur-md sticky top-0 z-30 border-b border-zinc-900/50">
+          <div className="relative" ref={profileDropdownRef}>
+            <button 
+              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+              className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white transition-all duration-300 group shadow-md"
+            >
+              <FaUser className="text-sm group-hover:scale-110 transition-transform text-violet-400" />
+              {user ? (
+                <span className="text-xs font-black tracking-wide">
+                  Hi, {user.username}
+                </span>
+              ) : (
+                <span className="text-xs font-black tracking-wide">
+                  Account
+                </span>
+              )}
             </button>
-            {!user && (
-              <button 
-                onClick={() => setShowAuth(true)}
-                className="px-5 py-2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold text-sm hover:opacity-90 transition-opacity shadow-[0_0_15px_rgba(124,58,237,0.3)]"
-              >
-                Login
-              </button>
-            )}
-            {user && (
-              <span className="text-sm font-bold text-zinc-300">
-                Hi, {user.username}
-              </span>
+            
+            {showProfileDropdown && (
+              <div className="absolute right-0 top-11 bg-zinc-950/95 border border-zinc-800 rounded-xl p-1.5 w-40 shadow-2xl z-30 backdrop-blur-md animate-in fade-in slide-in-from-top-1">
+                {user ? (
+                  <button
+                    onClick={() => {
+                      handleLogout()
+                      setShowProfileDropdown(false)
+                    }}
+                    className="w-full text-left text-xs font-bold px-3 py-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
+                  >
+                    Logout
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setShowAuth(true)
+                      setShowProfileDropdown(false)
+                    }}
+                    className="w-full text-left text-xs font-bold px-3 py-2 rounded-lg text-violet-400 hover:bg-violet-500/10 transition-colors"
+                  >
+                    Login
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </div>
         
         <div className="flex md:hidden items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-900 backdrop-blur-md sticky top-0 z-30">
-          <div className="flex items-center gap-2">
-            <button className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400">
-              <FaUser className="text-sm" />
+          <div className="relative" ref={mobileProfileDropdownRef}>
+            <button 
+              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400"
+            >
+              <FaUser className="text-xs text-violet-400" />
+              {user && (
+                <span className="text-[10px] font-bold text-zinc-300">
+                  Hi, {user.username}
+                </span>
+              )}
             </button>
-            {!user && (
-              <button 
-                onClick={() => setShowAuth(true)}
-                className="px-3 py-1.5 rounded-full bg-violet-600 text-white font-bold text-xs"
-              >
-                Login
-              </button>
+            
+            {showProfileDropdown && (
+              <div className="absolute left-0 top-9 bg-zinc-950/95 border border-zinc-800 rounded-xl p-1.5 w-32 shadow-2xl z-30 backdrop-blur-md">
+                {user ? (
+                  <button
+                    onClick={() => {
+                      handleLogout()
+                      setShowProfileDropdown(false)
+                    }}
+                    className="w-full text-left text-xs font-bold px-2 py-1.5 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
+                  >
+                    Logout
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setShowAuth(true)
+                      setShowProfileDropdown(false)
+                    }}
+                    className="w-full text-left text-xs font-bold px-2 py-1.5 rounded-lg text-violet-400 hover:bg-violet-500/10 transition-colors"
+                  >
+                    Login
+                  </button>
+                )}
+              </div>
             )}
           </div>
           <div className="flex items-center gap-2">
@@ -491,22 +560,26 @@ function App() {
             <div className="p-6 md:p-8 min-h-full">
 
               {/* WELCOME BANNER */}
-              <div className="relative overflow-hidden rounded-3xl border border-zinc-800/80 bg-gradient-to-br from-red-600/15 via-zinc-950 to-zinc-950 p-8 md:p-10 mb-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
+              <div className="relative overflow-hidden rounded-3xl border border-zinc-800/80 bg-gradient-to-br from-violet-600/10 via-zinc-950 to-fuchsia-950/10 p-8 md:p-10 mb-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl group hover:border-violet-500/30 transition-all duration-500">
+                {/* Glowing decor */}
+                <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-violet-600/20 rounded-full blur-3xl pointer-events-none group-hover:bg-violet-600/30 transition-all duration-500" />
+                <div className="absolute -left-10 -top-10 w-48 h-48 bg-fuchsia-600/10 rounded-full blur-3xl pointer-events-none" />
+                
                 <div className="z-10 text-center md:text-left">
-                  <span className="px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-xs font-bold text-red-500 uppercase tracking-widest">
-                    {greeting}, listener
+                  <span className="px-3.5 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-xs font-black text-violet-400 uppercase tracking-widest">
+                    ✨ {greeting}, listener
                   </span>
-                  <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight mt-3 uppercase welcome-title">
-                    Your Personal <span className="text-red-600 drop-shadow-[3px_3px_0px_rgba(0,0,0,0.95)]">Audio Frontier</span>
+                  <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight mt-4 uppercase welcome-title">
+                    Your Personal <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-500 to-rose-400 drop-shadow-[0_0_15px_rgba(139,92,246,0.3)]">Audio Frontier</span>
                   </h1>
-                  <p className="text-zinc-400 text-sm mt-2.5 max-w-md">
+                  <p className="text-zinc-400 text-sm mt-3.5 max-w-md font-medium">
                     Explore ad-free music, curated custom categories, and save your favorites in one beautifully designed, responsive app.
                   </p>
 
                   <div className="flex flex-wrap gap-3 mt-6 justify-center md:justify-start">
                     <Link
                       to="/search"
-                      className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold text-sm shadow-lg shadow-red-950/40 hover:scale-[1.02] active:scale-95 transition-all duration-300"
+                      className="px-6 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-black text-sm shadow-lg shadow-violet-950/40 hover:scale-[1.02] active:scale-95 transition-all duration-300"
                     >
                       🚀 Open Search
                     </Link>
@@ -522,12 +595,34 @@ function App() {
                 </div>
 
                 {/* STATS WIDGET */}
-                <div className="z-10 flex flex-col items-center justify-center p-6 bg-zinc-900/40 backdrop-blur-md border border-zinc-800/80 rounded-2xl min-w-[200px] shadow-lg shadow-black/40">
-                  <FaHeart className="text-3xl text-red-500 mb-2.5 animate-pulse" />
-                  <span className="text-2xl font-black text-white">{favorites.length}</span>
-                  <span className="text-xs text-zinc-500 font-semibold uppercase tracking-wider mt-1">Liked Songs</span>
+                <div className="z-10 flex flex-col items-center justify-center p-6 bg-zinc-900/40 backdrop-blur-md border border-zinc-800/80 rounded-2xl min-w-[200px] shadow-lg shadow-black/40 group-hover:border-violet-500/20 transition-all duration-500">
+                  <FaHeart className="text-3xl text-violet-500 mb-2.5 animate-pulse" />
+                  <span className="text-3xl font-black text-white">{favorites.length}</span>
+                  <span className="text-[10px] text-zinc-500 font-extrabold uppercase tracking-widest mt-1">Liked Songs</span>
                 </div>
               </div>
+
+              {/* CURRENT PLAY ACTIVE GLOW VISUALIZER (Top of Curated Mixes) */}
+              {currentSong && (
+                <div className="mb-10 p-6 rounded-2xl bg-gradient-to-r from-zinc-900/40 to-red-950/20 border border-zinc-900 backdrop-blur-md flex items-center justify-between w-full shadow-xl">
+                  <div className="flex items-center gap-4">
+                    <img src={currentSong.image} alt="" className="w-16 h-16 rounded-xl object-cover glow-pulse" />
+                    <div>
+                      <p className="text-xs uppercase tracking-widest text-red-500 font-bold">Now Playing</p>
+                      <h4 className="font-extrabold text-white text-lg truncate max-w-md mt-0.5">{currentSong.title}</h4>
+                      <p className="text-zinc-400 text-xs mt-0.5">{currentSong.artist}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-end gap-[4px] h-12">
+                    <div className="w-1.5 bg-gradient-to-t from-red-600 to-rose-500 rounded-full visualizer-bar" style={{ animationDelay: '0.1s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
+                    <div className="w-1.5 bg-gradient-to-t from-red-600 to-rose-500 rounded-full visualizer-bar-fast" style={{ animationDelay: '0.3s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
+                    <div className="w-1.5 bg-gradient-to-t from-red-600 to-rose-500 rounded-full visualizer-bar-slow" style={{ animationDelay: '0.5s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
+                    <div className="w-1.5 bg-gradient-to-t from-red-600 to-rose-500 rounded-full visualizer-bar" style={{ animationDelay: '0.2s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
+                    <div className="w-1.5 bg-gradient-to-t from-red-600 to-rose-500 rounded-full visualizer-bar-fast" style={{ animationDelay: '0.4s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
+                  </div>
+                </div>
+              )}
 
               {/* CURATED MIXES GRID */}
               <div className="mb-10">
@@ -601,33 +696,12 @@ function App() {
                         isFav={favorites.some(f => f.id === song.id)}
                         playlists={playlists}
                         addSongToPlaylist={addSongToPlaylist}
+                        isPlaying={isPlaying}
                       />
                     ))}
                   </div>
                 )}
               </div>
-
-              {/* BOTTOM ACTIVE GLOW VISUALIZER */}
-              {currentSong && (
-                <div className="mt-12 p-6 rounded-2xl bg-gradient-to-r from-zinc-900/40 to-red-950/20 border border-zinc-900 backdrop-blur-md flex items-center justify-between max-w-4xl shadow-xl">
-                  <div className="flex items-center gap-4">
-                    <img src={currentSong.image} alt="" className="w-16 h-16 rounded-xl object-cover glow-pulse" />
-                    <div>
-                      <p className="text-xs uppercase tracking-widest text-red-500 font-bold">Now Playing</p>
-                      <h4 className="font-extrabold text-white text-lg truncate max-w-md mt-0.5">{currentSong.title}</h4>
-                      <p className="text-zinc-400 text-xs mt-0.5">{currentSong.artist}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-end gap-[4px] h-12">
-                    <div className="w-1.5 bg-gradient-to-t from-red-600 to-rose-500 rounded-full visualizer-bar" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-1.5 bg-gradient-to-t from-red-600 to-rose-500 rounded-full visualizer-bar-fast" style={{ animationDelay: '0.3s' }}></div>
-                    <div className="w-1.5 bg-gradient-to-t from-red-600 to-rose-500 rounded-full visualizer-bar-slow" style={{ animationDelay: '0.5s' }}></div>
-                    <div className="w-1.5 bg-gradient-to-t from-red-600 to-rose-500 rounded-full visualizer-bar" style={{ animationDelay: '0.2s' }}></div>
-                    <div className="w-1.5 bg-gradient-to-t from-red-600 to-rose-500 rounded-full visualizer-bar-fast" style={{ animationDelay: '0.4s' }}></div>
-                  </div>
-                </div>
-              )}
 
             </div>
           } />
@@ -653,6 +727,7 @@ function App() {
               setProvider={setProvider}
               playlists={playlists}
               addSongToPlaylist={addSongToPlaylist}
+              isPlaying={isPlaying}
             />
           } />
 
@@ -682,6 +757,7 @@ function App() {
                 }
               }}
               favorites={favorites}
+              isPlaying={isPlaying}
             />
           } />
 
@@ -701,6 +777,7 @@ function App() {
               activeSongId={activeSongId}
               playlists={playlists}
               addSongToPlaylist={addSongToPlaylist}
+              isPlaying={isPlaying}
             />
           } />
         </Routes>
@@ -722,6 +799,8 @@ function App() {
         showToast={showToast}
         isShuffle={isShuffle}
         setIsShuffle={setIsShuffle}
+        playing={isPlaying}
+        setPlaying={setIsPlaying}
       />
 
       {showAuth && (

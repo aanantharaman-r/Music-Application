@@ -5,6 +5,7 @@ function MusicCard({
   song,
   setCurrentSong,
   isActive,
+  isPlaying,
   onFav,
   isFav,
   playlists = [],
@@ -164,9 +165,9 @@ function MusicCard({
               Playing
             </span>
             <div className="flex items-end gap-[3px] h-3.5">
-              <div className="w-[2px] bg-violet-500 rounded-full visualizer-bar" style={{ animationDelay: '0.1s' }}></div>
-              <div className="w-[2px] bg-violet-500 rounded-full visualizer-bar-fast" style={{ animationDelay: '0.3s' }}></div>
-              <div className="w-[2px] bg-violet-500 rounded-full visualizer-bar-slow" style={{ animationDelay: '0.5s' }}></div>
+              <div className="w-[2px] bg-violet-500 rounded-full visualizer-bar" style={{ animationDelay: '0.1s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
+              <div className="w-[2px] bg-violet-500 rounded-full visualizer-bar-fast" style={{ animationDelay: '0.3s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
+              <div className="w-[2px] bg-violet-500 rounded-full visualizer-bar-slow" style={{ animationDelay: '0.5s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
             </div>
           </div>
         )}

@@ -9,7 +9,8 @@ function Favorites({
   onFav,
   activeSongId,
   playlists = [],
-  addSongToPlaylist
+  addSongToPlaylist,
+  isPlaying
 }) {
 
   return (
@@ -68,6 +69,7 @@ function Favorites({
               onFav={() => onFav(song)}
               playlists={playlists}
               addSongToPlaylist={addSongToPlaylist}
+              isPlaying={isPlaying}
             />
           ))}
         </div>

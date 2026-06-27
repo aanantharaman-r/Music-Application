@@ -59,8 +59,9 @@ function Sidebar({ menuOpen, setMenuOpen, playlists = [], createPlaylist, user, 
                 className="w-20 h-20 rounded-2xl object-cover border border-zinc-950/20 group-hover:scale-[1.02] transition-all duration-300" 
               />
             </div>
-            <h1 className="text-lg font-black tracking-[0.2em] text-white group-hover:text-violet-400 transition-colors mt-1">
-              LESSO <span className="text-violet-500">TUNES</span>
+            <h1 className="text-lg font-black tracking-[0.2em] mt-1">
+              <span className="text-white group-hover:text-violet-500 transition-colors duration-300">LESSO</span>{" "}
+              <span className="text-violet-500 group-hover:text-white transition-colors duration-300">TUNES</span>
             </h1>
           </Link>
 
@@ -177,21 +178,7 @@ function Sidebar({ menuOpen, setMenuOpen, playlists = [], createPlaylist, user, 
       {/* FOOTER ACCENT */}
       <div className="relative p-4 rounded-2xl bg-zinc-900/40 border border-zinc-900 text-center overflow-hidden flex-shrink-0">
         <div className="absolute -top-12 -left-12 w-24 h-24 bg-violet-600/10 blur-xl rounded-full" />
-        {user ? (
-          <div className="relative z-10 flex flex-col gap-2">
-            <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider truncate">
-              Signed in as <span className="text-violet-400">{user.username}</span>
-            </p>
-            <button
-              onClick={handleLogout}
-              className="w-full py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 text-red-400 hover:text-red-300 font-black text-[10px] tracking-wider uppercase transition-all duration-300"
-            >
-              Logout
-            </button>
-          </div>
-        ) : (
-          <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">LESSO Tunes Space</p>
-        )}
+        <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">LESSO Tunes Space</p>
       </div>
 
     </div>
