@@ -513,7 +513,7 @@ function App() {
             >
               ☰
             </button>
-            <img src={logo} alt="Logo" className="w-8 h-8 rounded-lg object-cover hidden sm:block" />
+            <img src={logo} alt="Logo" className="w-8 h-8 rounded-lg object-cover" />
           </div>
 
           {/* RIGHT: PROFILE DROPDOWN */}
@@ -560,36 +560,36 @@ function App() {
 
         <Routes>
           <Route path="/" element={
-            <div className="p-6 md:p-8 min-h-full">
+            <div className="p-4 md:p-8 min-h-full">
 
               {/* WELCOME BANNER */}
-              <div className="relative overflow-hidden rounded-3xl border border-zinc-800/80 bg-gradient-to-br from-violet-600/10 via-zinc-950 to-fuchsia-950/10 p-8 md:p-10 mb-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl group hover:border-violet-500/30 transition-all duration-500">
+              <div className="relative overflow-hidden rounded-3xl border border-zinc-800/80 bg-gradient-to-br from-violet-600/10 via-zinc-950 to-fuchsia-950/10 p-5 md:p-10 mb-6 md:mb-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl group hover:border-violet-500/30 transition-all duration-500">
                 {/* Glowing decor */}
                 <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-violet-600/20 rounded-full blur-3xl pointer-events-none group-hover:bg-violet-600/30 transition-all duration-500" />
                 <div className="absolute -left-10 -top-10 w-48 h-48 bg-fuchsia-600/10 rounded-full blur-3xl pointer-events-none" />
                 
                 <div className="z-10 text-center md:text-left">
-                  <span className="px-3.5 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-xs font-black text-violet-400 uppercase tracking-widest">
+                  <span className="px-2.5 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-[10px] md:text-xs font-black text-violet-400 uppercase tracking-widest">
                     ✨ {greeting}, listener
                   </span>
-                  <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight mt-4 uppercase welcome-title">
+                  <h1 className="text-xl sm:text-2xl md:text-5xl font-black tracking-tight leading-tight mt-2 md:mt-4 uppercase welcome-title">
                     Your Personal <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-500 to-rose-400 drop-shadow-[0_0_15px_rgba(139,92,246,0.3)]">Audio Frontier</span>
                   </h1>
-                  <p className="text-zinc-400 text-sm mt-3.5 max-w-md font-medium">
+                  <p className="text-zinc-400 text-xs md:text-sm mt-1.5 md:mt-3.5 max-w-md font-medium">
                     Explore ad-free music, curated custom categories, and save your favorites in one beautifully designed, responsive app.
                   </p>
 
-                  <div className="flex flex-wrap gap-3 mt-6 justify-center md:justify-start">
+                  <div className="flex flex-wrap gap-2.5 mt-3 md:mt-6 justify-center md:justify-start">
                     <Link
                       to="/search"
-                      className="px-6 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-black text-sm shadow-lg shadow-violet-950/40 hover:scale-[1.02] active:scale-95 transition-all duration-300"
+                      className="px-4 py-2 text-xs md:px-6 md:py-3 md:text-sm rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-black shadow-lg shadow-violet-950/40 hover:scale-[1.02] active:scale-95 transition-all duration-300"
                     >
                       🚀 Open Search
                     </Link>
                     {favorites.length > 0 && (
                       <button
                         onClick={playFavoritesRandom}
-                        className="px-6 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 font-bold text-sm flex items-center gap-2 hover:scale-[1.02] active:scale-95 transition-all duration-300"
+                        className="px-4 py-2 text-xs md:px-6 md:py-3 md:text-sm rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 font-bold flex items-center gap-2 hover:scale-[1.02] active:scale-95 transition-all duration-300"
                       >
                         <FaRandom className="text-xs" /> Shuffle Favorites
                       </button>
@@ -598,7 +598,7 @@ function App() {
                 </div>
 
                 {/* STATS WIDGET */}
-                <div className="z-10 flex flex-col items-center justify-center p-6 bg-zinc-900/40 backdrop-blur-md border border-zinc-800/80 rounded-2xl min-w-[200px] shadow-lg shadow-black/40 group-hover:border-violet-500/20 transition-all duration-500">
+                <div className="z-10 hidden sm:flex flex-col items-center justify-center p-6 bg-zinc-900/40 backdrop-blur-md border border-zinc-800/80 rounded-2xl min-w-[200px] shadow-lg shadow-black/40 group-hover:border-violet-500/20 transition-all duration-500">
                   <FaHeart className="text-3xl text-violet-500 mb-2.5 animate-pulse" />
                   <span className="text-3xl font-black text-white">{favorites.length}</span>
                   <span className="text-[10px] text-zinc-500 font-extrabold uppercase tracking-widest mt-1">Liked Songs</span>
