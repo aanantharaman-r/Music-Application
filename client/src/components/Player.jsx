@@ -301,13 +301,13 @@ function Player({
 
             {/* ALBUM ART - COOL ANIMATED CARD */}
             <div className="flex-1 flex items-center justify-center my-4">
-              <div className={`relative w-72 h-72 sm:w-80 sm:h-80 rounded-[2rem] overflow-hidden border-2 border-zinc-800 shadow-2xl transition-all duration-700 ${playing ? 'scale-100 rotate-1' : 'scale-[0.96]'}`}>
+              <div className={`relative w-72 h-72 sm:w-80 sm:h-80 rounded-[2rem] overflow-hidden border-2 border-zinc-800 shadow-2xl transition-all duration-700 ${playing ? 'scale-100' : 'scale-[0.96]'}`}>
                 {/* Vinyl overlay backing glow */}
                 <div className={`absolute -inset-1.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-[2rem] blur opacity-30 ${playing ? 'animate-pulse' : 'opacity-10'}`} />
                 <img 
                   src={currentSong.image} 
                   alt="" 
-                  className={`relative w-full h-full object-cover z-10 rounded-[2rem] ${playing ? 'rotate-animation' : ''}`}
+                  className="relative w-full h-full object-cover z-10 rounded-[2rem]"
                 />
               </div>
             </div>
