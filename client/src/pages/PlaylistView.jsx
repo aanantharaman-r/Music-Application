@@ -23,7 +23,7 @@ function PlaylistView({
     return (
       <div className="p-8 text-center">
         <h2 className="text-2xl font-bold">Playlist not found</h2>
-        <button onClick={() => navigate("/")} className="mt-4 px-4 py-2 bg-violet-600 rounded-xl font-bold text-sm">
+        <button onClick={() => navigate("/")} className="mt-4 px-4 py-2 bg-violet-600 hover:bg-violet-500 rounded-xl font-bold text-sm text-white">
           Go Home
         </button>
       </div>
@@ -52,7 +52,7 @@ function PlaylistView({
         <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-violet-600/10 blur-[100px] rounded-full pointer-events-none" />
         
         <div className="flex flex-col md:flex-row items-center gap-6">
-          <div className="w-28 h-28 md:w-32 md:h-32 rounded-2xl bg-gradient-to-br from-violet-600/50 to-rose-600/50 border border-violet-500/25 flex items-center justify-center shadow-lg flex-shrink-0">
+          <div className="w-28 h-28 md:w-32 md:h-32 rounded-2xl bg-gradient-to-br from-violet-600/50 to-fuchsia-600/50 border border-violet-500/25 flex items-center justify-center shadow-lg flex-shrink-0">
             <FaMusic className="text-4xl text-violet-400" />
           </div>
 

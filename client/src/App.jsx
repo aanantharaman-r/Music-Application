@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react"
-import { FaChartBar, FaHeart, FaPlay, FaRandom, FaUser, FaMusic } from "react-icons/fa"
-import { Routes, Route, Link } from "react-router-dom"
+import { FaChartBar, FaHeart, FaPlay, FaRandom, FaUser, FaMusic, FaSearch } from "react-icons/fa"
+import { Routes, Route, Link, useNavigate } from "react-router-dom"
 import axios from "axios"
 
 import Sidebar from "./components/Sidebar"
@@ -75,11 +75,11 @@ function App() {
 
   // Curated quick mixes for Home Page (JioSaavn queries)
   const quickMixes = [
-    { name: "Lofi Sleep", query: "lofi sleep chill beats", gradient: "from-indigo-600/30 to-violet-950/40", icon: "💤" },
-    { name: "Retro Electro", query: "retro electro synthwave", gradient: "from-rose-600/30 to-red-950/40", icon: "⚡" },
-    { name: "Study Focus", query: "deep focus ambient study music", gradient: "from-emerald-600/30 to-teal-950/40", icon: "📚" },
-    { name: "Workout Boost", query: "synthwave workout motivation", gradient: "from-amber-600/30 to-orange-950/40", icon: "🔥" },
-    { name: "Rainy Day Cozy", query: "cozy rainy day jazz piano", gradient: "from-blue-600/30 to-slate-950/40", icon: "🌧️" }
+    { name: "Lofi Sleep", query: "lofi sleep chill beats", gradient: "from-violet-600/30 to-purple-950/50", icon: "💤" },
+    { name: "Retro Electro", query: "retro electro synthwave", gradient: "from-fuchsia-600/30 to-violet-950/50", icon: "⚡" },
+    { name: "Study Focus", query: "deep focus ambient study music", gradient: "from-purple-600/30 to-indigo-950/50", icon: "📚" },
+    { name: "Workout Boost", query: "synthwave workout motivation", gradient: "from-violet-500/30 to-fuchsia-950/50", icon: "🔥" },
+    { name: "Rainy Day Cozy", query: "cozy rainy day jazz piano", gradient: "from-indigo-600/30 to-violet-950/50", icon: "🌧️" }
   ]
 
   // Set greeting based on local time
@@ -101,21 +101,22 @@ function App() {
     localStorage.setItem("aj-favorites", JSON.stringify(favorites))
   }, [favorites])
 
-  // Fetch playlists from server
+  // Fetch playlists from server or localStorage
   const fetchPlaylists = async () => {
-    if (!token) return
-    try {
-      const res = await axios.get(`${API_URL}/playlists`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      const formatted = res.data.map(p => ({
-        id: p._id,
-        name: p.name,
-        songs: p.songs || []
-      }))
-      setPlaylists(formatted)
-    } catch (err) {
-      console.error("Error fetching playlists:", err)
+    if (token) {
+      try {
+        const res = await axios.get(`${API_URL}/playlists`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        const formatted = res.data.map(p => ({
+          id: p._id,
+          name: p.name,
+          songs: p.songs || []
+        }))
+        setPlaylists(formatted)
+      } catch (err) {
+        console.error("Error fetching playlists:", err)
+      }
     }
   }
 
@@ -123,91 +124,145 @@ function App() {
     if (token) {
       fetchPlaylists()
     } else {
-      setPlaylists([])
+      const saved = localStorage.getItem("aj-guest-playlists")
+      if (saved) {
+        try {
+          setPlaylists(JSON.parse(saved))
+        } catch (e) {
+          setPlaylists([])
+        }
+      } else {
+        setPlaylists([])
+      }
     }
   }, [token])
 
+  useEffect(() => {
+    if (!token) {
+      localStorage.setItem("aj-guest-playlists", JSON.stringify(playlists))
+    }
+  }, [playlists, token])
+
   // Custom Playlist Helpers
   const createPlaylist = async (name) => {
-    if (!token) return
-    try {
-      const res = await axios.post(`${API_URL}/playlists`, { name }, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      const newP = {
-        id: res.data._id,
-        name: res.data.name,
-        songs: res.data.songs || []
+    if (token) {
+      try {
+        const res = await axios.post(`${API_URL}/playlists`, { name }, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        const newP = {
+          id: res.data._id,
+          name: res.data.name,
+          songs: res.data.songs || []
+        }
+        setPlaylists(prev => [...prev, newP])
+        showToast(`Playlist "${name}" created`)
+        return
+      } catch (err) {
+        console.error("Error creating playlist on server:", err)
       }
-      setPlaylists([...playlists, newP])
-      showToast(`Playlist "${name}" created`)
-    } catch (err) {
-      console.error("Error creating playlist:", err)
-      showToast("Failed to create playlist", "error")
     }
+    // Guest mode or server fallback
+    const newP = {
+      id: `local_${Date.now()}`,
+      name,
+      songs: []
+    }
+    setPlaylists(prev => [...prev, newP])
+    showToast(`Playlist "${name}" created`)
   }
 
   const deletePlaylist = async (id) => {
-    if (!token) return
     const playlistName = playlists.find(p => p.id === id)?.name || "Playlist"
-    try {
-      await axios.delete(`${API_URL}/playlists/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      setPlaylists(playlists.filter(p => p.id !== id))
-      showToast(`Deleted playlist "${playlistName}"`)
-    } catch (err) {
-      console.error("Error deleting playlist:", err)
-      showToast("Failed to delete playlist", "error")
+    if (token && !String(id).startsWith("local_")) {
+      try {
+        await axios.delete(`${API_URL}/playlists/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      } catch (err) {
+        console.error("Error deleting playlist on server:", err)
+      }
     }
+    setPlaylists(prev => prev.filter(p => p.id !== id))
+    showToast(`Deleted playlist "${playlistName}"`)
   }
 
   const addSongToPlaylist = async (playlistId, song) => {
-    if (!token) return
     const playlistName = playlists.find(p => p.id === playlistId)?.name || "Playlist"
-    try {
-      const res = await axios.put(`${API_URL}/playlists/${playlistId}/songs`, { song }, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      setPlaylists(playlists.map(p => {
-        if (p.id === playlistId) {
-          return {
-            id: res.data._id,
-            name: res.data.name,
-            songs: res.data.songs || []
-          }
-        }
-        return p
-      }))
-      showToast(`"${song.title}" added to "${playlistName}"`)
-    } catch (err) {
-      console.error("Error adding song to playlist:", err)
-      showToast("Failed to add song to playlist", "error")
+    const targetP = playlists.find(p => p.id === playlistId)
+    if (targetP && targetP.songs.some(s => s.id === song.id)) {
+      showToast(`"${song.title}" is already in "${playlistName}"`)
+      return
     }
+
+    if (token && !String(playlistId).startsWith("local_")) {
+      try {
+        const res = await axios.put(`${API_URL}/playlists/${playlistId}/songs`, { song }, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        setPlaylists(prev => prev.map(p => {
+          if (p.id === playlistId) {
+            return {
+              id: res.data._id,
+              name: res.data.name,
+              songs: res.data.songs || []
+            }
+          }
+          return p
+        }))
+        showToast(`"${song.title}" added to "${playlistName}"`)
+        return
+      } catch (err) {
+        console.error("Error adding song to playlist on server:", err)
+      }
+    }
+
+    setPlaylists(prev => prev.map(p => {
+      if (p.id === playlistId) {
+        return {
+          ...p,
+          songs: [...p.songs, song]
+        }
+      }
+      return p
+    }))
+    showToast(`"${song.title}" added to "${playlistName}"`)
   }
 
   const removeSongFromPlaylist = async (playlistId, songId) => {
-    if (!token) return
     const playlistName = playlists.find(p => p.id === playlistId)?.name || "Playlist"
-    try {
-      const res = await axios.delete(`${API_URL}/playlists/${playlistId}/songs/${songId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      setPlaylists(playlists.map(p => {
-        if (p.id === playlistId) {
-          return {
-            id: res.data._id,
-            name: res.data.name,
-            songs: res.data.songs || []
+    if (token && !String(playlistId).startsWith("local_")) {
+      try {
+        const res = await axios.delete(`${API_URL}/playlists/${playlistId}/songs/${songId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        setPlaylists(prev => prev.map(p => {
+          if (p.id === playlistId) {
+            return {
+              id: res.data._id,
+              name: res.data.name,
+              songs: res.data.songs || []
+            }
           }
-        }
-        return p
-      }))
-      showToast(`Song removed from "${playlistName}"`)
-    } catch (err) {
-      console.error("Error removing song from playlist:", err)
-      showToast("Failed to remove song from playlist", "error")
+          return p
+        }))
+        showToast(`Song removed from "${playlistName}"`)
+        return
+      } catch (err) {
+        console.error("Error removing song from playlist on server:", err)
+      }
     }
+
+    setPlaylists(prev => prev.map(p => {
+      if (p.id === playlistId) {
+        return {
+          ...p,
+          songs: p.songs.filter(s => s.id !== songId)
+        }
+      }
+      return p
+    }))
+    showToast(`Song removed from "${playlistName}"`)
   }
 
 
@@ -392,22 +447,22 @@ function App() {
 
         <div className="z-10 flex flex-col items-center gap-8 relative">
           {/* Animated Music Notes */}
-          <FaMusic className="absolute -top-10 -left-12 text-violet-500/40 text-3xl note-float-1" />
-          <FaMusic className="absolute top-10 -right-16 text-fuchsia-500/40 text-2xl note-float-2" />
-          <FaMusic className="absolute -bottom-6 -left-8 text-rose-500/40 text-xl note-float-3" />
+          <FaMusic className="absolute -top-10 -left-12 text-violet-400/50 text-3xl note-float-1" />
+          <FaMusic className="absolute top-10 -right-16 text-fuchsia-400/50 text-2xl note-float-2" />
+          <FaMusic className="absolute -bottom-6 -left-8 text-purple-400/50 text-xl note-float-3" />
 
           {/* Logo container with pulse/glow */}
           <div className="relative group">
-            <div className="absolute -inset-2 bg-gradient-to-r from-red-600 via-violet-600 to-fuchsia-600 rounded-full blur-md opacity-75 animate-spin-slow"></div>
+            <div className="absolute -inset-2 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-full blur-md opacity-80 animate-spin-slow"></div>
             <img 
               src={logo} 
               alt="Logo" 
-              className="relative w-32 h-32 rounded-full object-cover shadow-2xl border-[3px] border-zinc-900/80 z-10"
+              className="relative w-32 h-32 rounded-full object-cover shadow-2xl border-[3px] border-zinc-900 z-10"
             />
           </div>
 
           <div className="flex flex-col items-center gap-3 mt-4">
-            <h1 className="text-3xl font-black tracking-widest text-white uppercase drop-shadow-[0_0_15px_rgba(139,92,246,0.5)]">
+            <h1 className="text-3xl font-black tracking-widest text-white uppercase drop-shadow-[0_0_15px_rgba(139,92,246,0.6)]">
               LESSO <span className="text-violet-500">TUNES</span>
             </h1>
             <p className="text-zinc-400 text-xs tracking-[0.3em] font-bold uppercase">
@@ -419,7 +474,7 @@ function App() {
           <div className="mt-6 flex items-end justify-center gap-1.5 h-8">
             <div className="w-1.5 bg-violet-500 rounded-t-sm visualizer-bar"></div>
             <div className="w-1.5 bg-fuchsia-500 rounded-t-sm visualizer-bar-fast"></div>
-            <div className="w-1.5 bg-rose-500 rounded-t-sm visualizer-bar-slow"></div>
+            <div className="w-1.5 bg-purple-500 rounded-t-sm visualizer-bar-slow"></div>
             <div className="w-1.5 bg-violet-500 rounded-t-sm visualizer-bar" style={{ animationDelay: '0.2s' }}></div>
             <div className="w-1.5 bg-fuchsia-500 rounded-t-sm visualizer-bar-fast" style={{ animationDelay: '0.4s' }}></div>
           </div>
@@ -455,14 +510,14 @@ function App() {
       />
 
 
-      <div className="flex-1 flex flex-col h-screen overflow-y-auto z-10 pb-32">
+      <div className="flex-1 flex flex-col h-screen overflow-y-auto z-10 pb-32 xl:mr-[340px]">
         
         {/* DESKTOP/MAIN HEADER */}
         <div className="hidden md:flex items-center justify-end px-8 py-4 bg-zinc-950/40 backdrop-blur-md sticky top-0 z-30 border-b border-zinc-900/50">
           <div className="relative" ref={profileDropdownRef}>
             <button 
               onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-              className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white transition-all duration-300 group shadow-md"
+              className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800/80 hover:border-violet-500/50 text-zinc-300 hover:text-white transition-all duration-300 group shadow-md"
             >
               <FaUser className="text-sm group-hover:scale-110 transition-transform text-violet-400" />
               {user ? (
@@ -509,7 +564,7 @@ function App() {
           <div className="flex items-center gap-2">
             <button 
               onClick={() => setMenuOpen(true)}
-              className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-red-500 hover:bg-zinc-800 transition"
+              className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-violet-400 hover:bg-zinc-800 transition"
             >
               ☰
             </button>
@@ -575,7 +630,7 @@ function App() {
                   <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight mt-4 uppercase welcome-title">
                     Your Personal <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-500 to-rose-400 drop-shadow-[0_0_15px_rgba(139,92,246,0.3)]">Audio Frontier</span>
                   </h1>
-                  <p className="text-zinc-400 text-sm mt-3.5 max-w-md font-medium">
+                  <p className="text-white text-sm mt-3.5 max-w-md font-medium">
                     Explore ad-free music, curated custom categories, and save your favorites in one beautifully designed, responsive app.
                   </p>
 
@@ -591,7 +646,7 @@ function App() {
                         onClick={playFavoritesRandom}
                         className="px-6 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 font-bold text-sm flex items-center gap-2 hover:scale-[1.02] active:scale-95 transition-all duration-300"
                       >
-                        <FaRandom className="text-xs" /> Shuffle Favorites
+                        <FaRandom className="text-xs text-violet-400" /> Shuffle Favorites
                       </button>
                     )}
                   </div>
@@ -607,22 +662,22 @@ function App() {
 
               {/* CURRENT PLAY ACTIVE GLOW VISUALIZER (Top of Curated Mixes) */}
               {currentSong && (
-                <div className="mb-10 p-4 md:p-6 rounded-2xl bg-gradient-to-r from-zinc-900/40 to-red-950/20 border border-zinc-900 backdrop-blur-md flex items-center justify-between w-full shadow-xl gap-4">
+                <div className="mb-10 p-4 md:p-6 rounded-2xl bg-gradient-to-r from-zinc-900/40 via-[#08060c] to-violet-950/20 border border-zinc-800/80 backdrop-blur-md flex items-center justify-between w-full shadow-xl gap-4">
                   <div className="flex items-center gap-3.5 min-w-0">
                     <img src={currentSong.image} alt="" className="w-12 h-12 md:w-16 md:h-16 rounded-xl object-cover glow-pulse flex-shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-[10px] md:text-xs uppercase tracking-widest text-red-500 font-bold">Now Playing</p>
+                      <p className="text-[10px] md:text-xs uppercase tracking-widest text-violet-400 font-bold">Now Playing</p>
                       <h4 className="font-extrabold text-white text-sm md:text-lg truncate max-w-[160px] sm:max-w-xs md:max-w-md mt-0.5">{currentSong.title}</h4>
                       <p className="text-zinc-400 text-[10px] md:text-xs truncate mt-0.5">{currentSong.artist}</p>
                     </div>
                   </div>
                   
                   <div className="flex items-end gap-[3px] md:gap-[4px] h-8 md:h-12 flex-shrink-0">
-                    <div className="w-1.5 bg-gradient-to-t from-red-600 to-rose-500 rounded-full visualizer-bar" style={{ animationDelay: '0.1s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
-                    <div className="w-1.5 bg-gradient-to-t from-red-600 to-rose-500 rounded-full visualizer-bar-fast" style={{ animationDelay: '0.3s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
-                    <div className="w-1.5 bg-gradient-to-t from-red-600 to-rose-500 rounded-full visualizer-bar-slow" style={{ animationDelay: '0.5s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
-                    <div className="w-1.5 bg-gradient-to-t from-red-600 to-rose-500 rounded-full visualizer-bar" style={{ animationDelay: '0.2s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
-                    <div className="w-1.5 bg-gradient-to-t from-red-600 to-rose-500 rounded-full visualizer-bar-fast" style={{ animationDelay: '0.4s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
+                    <div className="w-1.5 bg-gradient-to-t from-violet-600 to-fuchsia-500 rounded-full visualizer-bar" style={{ animationDelay: '0.1s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
+                    <div className="w-1.5 bg-gradient-to-t from-violet-600 to-fuchsia-500 rounded-full visualizer-bar-fast" style={{ animationDelay: '0.3s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
+                    <div className="w-1.5 bg-gradient-to-t from-violet-600 to-fuchsia-500 rounded-full visualizer-bar-slow" style={{ animationDelay: '0.5s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
+                    <div className="w-1.5 bg-gradient-to-t from-violet-600 to-fuchsia-500 rounded-full visualizer-bar" style={{ animationDelay: '0.2s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
+                    <div className="w-1.5 bg-gradient-to-t from-violet-600 to-fuchsia-500 rounded-full visualizer-bar-fast" style={{ animationDelay: '0.4s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
                   </div>
                 </div>
               )}
@@ -814,12 +869,12 @@ function App() {
       )}
 
       {toast && (
-        <div className="fixed top-6 right-6 z-[100000] bg-zinc-950/90 border border-violet-500/30 rounded-2xl px-5 py-3 shadow-[0_0_25px_rgba(139,92,246,0.2)] animate-in fade-in slide-in-from-top-6 flex items-center gap-3.5 backdrop-blur-lg">
-          <div className="w-8 h-8 rounded-full bg-violet-600/15 border border-violet-500/30 flex items-center justify-center text-sm">
+        <div className="fixed top-6 right-6 z-[100000] bg-zinc-950/90 border border-violet-500/30 rounded-2xl px-5 py-3 shadow-[0_0_25px_rgba(139,92,246,0.3)] animate-in fade-in slide-in-from-top-6 flex items-center gap-3.5 backdrop-blur-lg">
+          <div className="w-8 h-8 rounded-full bg-violet-600/20 border border-violet-500/30 flex items-center justify-center text-sm">
             {toast.type === "success" ? "🎵" : "⚠️"}
           </div>
           <div>
-            <p className="text-xs font-black uppercase tracking-wider text-zinc-500">Notification</p>
+            <p className="text-xs font-black uppercase tracking-wider text-violet-400">Notification</p>
             <p className="text-xs font-extrabold text-white mt-0.5">{toast.message}</p>
           </div>
         </div>

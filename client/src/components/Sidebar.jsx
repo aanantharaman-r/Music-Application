@@ -52,7 +52,7 @@ function Sidebar({ menuOpen, setMenuOpen, playlists = [], createPlaylist, user, 
         {/* LOGO BRANDING */}
         <div className="mb-8 flex flex-col items-center justify-center flex-shrink-0 relative w-full text-center">
           <Link to="/" className="flex flex-col items-center gap-3 group w-full">
-            <div className="relative p-0.5 rounded-2xl bg-gradient-to-tr from-violet-600 to-fuchsia-600 shadow-[0_8px_30px_rgb(124,58,237,0.2)] group-hover:shadow-[0_8px_30px_rgb(124,58,237,0.4)] transition-all duration-300">
+            <div className="relative p-0.5 rounded-2xl bg-gradient-to-tr from-violet-600 via-purple-600 to-fuchsia-600 shadow-[0_8px_30px_rgba(139,92,246,0.3)] group-hover:shadow-[0_8px_30px_rgba(139,92,246,0.5)] transition-all duration-300">
               <img 
                 src={logo} 
                 alt="LESSO TUNES Logo" 
@@ -60,7 +60,7 @@ function Sidebar({ menuOpen, setMenuOpen, playlists = [], createPlaylist, user, 
               />
             </div>
             <h1 className="text-lg font-black tracking-[0.2em] mt-1">
-              <span className="text-white group-hover:text-violet-500 transition-colors duration-300">LESSO</span>{" "}
+              <span className="text-white group-hover:text-violet-400 transition-colors duration-300">LESSO</span>{" "}
               <span className="text-violet-500 group-hover:text-white transition-colors duration-300">TUNES</span>
             </h1>
           </Link>
@@ -81,15 +81,15 @@ function Sidebar({ menuOpen, setMenuOpen, playlists = [], createPlaylist, user, 
             onClick={() => setMenuOpen(false)}
             className={`flex items-center gap-4 px-4 py-3.5 rounded-xl border transition-all duration-300 group relative
               ${isActive("/") 
-                ? "bg-violet-500/10 border-violet-500/20 text-white" 
-                : "bg-transparent border-transparent text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-200"
+                ? "bg-violet-600/20 border-violet-500/40 text-white font-bold" 
+                : "bg-transparent border-transparent text-white hover:bg-zinc-900/80"
               }`}
           >
             {isActive("/") && (
-              <span className="absolute left-0 top-3 bottom-3 w-1 bg-violet-500 rounded-r" />
+              <span className="absolute left-0 top-3 bottom-3 w-1 bg-violet-400 rounded-r" />
             )}
-            <FaHome className={`text-base transition group-hover:scale-115 ${isActive("/") ? "text-violet-500" : "text-zinc-500"}`} />
-            <span className="font-semibold text-sm">Home</span>
+            <FaHome className={`text-base transition group-hover:scale-115 ${isActive("/") ? "text-violet-400" : "text-white"}`} />
+            <span className="font-semibold text-sm text-white">Home</span>
           </Link>
 
           <Link
@@ -97,15 +97,15 @@ function Sidebar({ menuOpen, setMenuOpen, playlists = [], createPlaylist, user, 
             onClick={() => setMenuOpen(false)}
             className={`flex items-center gap-4 px-4 py-3.5 rounded-xl border transition-all duration-300 group relative
               ${isActive("/search") 
-                ? "bg-violet-500/10 border-violet-500/20 text-white" 
-                : "bg-transparent border-transparent text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-200"
+                ? "bg-violet-600/20 border-violet-500/40 text-white font-bold" 
+                : "bg-transparent border-transparent text-white hover:bg-zinc-900/80"
               }`}
           >
             {isActive("/search") && (
-              <span className="absolute left-0 top-3 bottom-3 w-1 bg-violet-500 rounded-r" />
+              <span className="absolute left-0 top-3 bottom-3 w-1 bg-violet-400 rounded-r" />
             )}
-            <FaSearch className={`text-base transition group-hover:scale-115 ${isActive("/search") ? "text-violet-500" : "text-zinc-500"}`} />
-            <span className="font-semibold text-sm">Search</span>
+            <FaSearch className={`text-base transition group-hover:scale-115 ${isActive("/search") ? "text-violet-400" : "text-white"}`} />
+            <span className="font-semibold text-sm text-white">Search</span>
           </Link>
 
           <Link
@@ -113,27 +113,27 @@ function Sidebar({ menuOpen, setMenuOpen, playlists = [], createPlaylist, user, 
             onClick={() => setMenuOpen(false)}
             className={`flex items-center gap-4 px-4 py-3.5 rounded-xl border transition-all duration-300 group relative
               ${isActive("/favorites") 
-                ? "bg-violet-500/10 border-violet-500/20 text-white" 
-                : "bg-transparent border-transparent text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-200"
+                ? "bg-violet-600/20 border-violet-500/40 text-white font-bold" 
+                : "bg-transparent border-transparent text-white hover:bg-zinc-900/80"
               }`}
           >
             {isActive("/favorites") && (
-              <span className="absolute left-0 top-3 bottom-3 w-1 bg-violet-500 rounded-r" />
+              <span className="absolute left-0 top-3 bottom-3 w-1 bg-violet-400 rounded-r" />
             )}
-            <FaHeart className={`text-base transition group-hover:scale-115 ${isActive("/favorites") ? "text-violet-500" : "text-zinc-500"}`} />
-            <span className="font-semibold text-sm">Favorites</span>
+            <FaHeart className={`text-base transition group-hover:scale-115 ${isActive("/favorites") ? "text-violet-400" : "text-white"}`} />
+            <span className="font-semibold text-sm text-white">Favorites</span>
           </Link>
         </div>
 
         {/* CUSTOM PLAYLISTS HEADER */}
         <div className="mt-8 flex items-center justify-between border-t border-zinc-900/80 pt-6 px-1 flex-shrink-0">
-          <div className="flex items-center gap-2 text-zinc-500">
-            <FaMusic className="text-xs" />
-            <span className="text-xs font-bold uppercase tracking-wider">Playlists</span>
+          <div className="flex items-center gap-2 text-white">
+            <FaMusic className="text-xs text-white" />
+            <span className="text-xs font-bold uppercase tracking-wider text-white">Playlists</span>
           </div>
           <button 
             onClick={handleCreate}
-            className="p-1 rounded-md text-zinc-500 hover:text-violet-500 hover:bg-zinc-900 transition-colors"
+            className="p-1 rounded-md text-white hover:text-violet-400 hover:bg-zinc-900 transition-colors"
             title="Create Playlist"
           >
             <FaPlus className="text-xs" />
@@ -151,16 +151,16 @@ function Sidebar({ menuOpen, setMenuOpen, playlists = [], createPlaylist, user, 
                 onClick={() => setMenuOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all duration-300 group relative
                   ${isActive(path)
-                    ? "bg-zinc-900 border-zinc-800 text-white font-bold"
-                    : "bg-transparent border-transparent text-zinc-400 hover:bg-zinc-900/40 hover:text-zinc-200"
+                    ? "bg-zinc-900 border-violet-500/40 text-white font-bold"
+                    : "bg-transparent border-transparent text-white hover:bg-zinc-900/60"
                   }`}
               >
                 {isActive(path) && (
                   <span className="absolute left-0 top-2.5 bottom-2.5 w-[3px] bg-violet-500 rounded-r" />
                 )}
-                <FaFolder className={`text-sm transition group-hover:scale-115 ${isActive(path) ? "text-violet-500" : "text-zinc-500"}`} />
-                <span className="truncate flex-1">{p.name}</span>
-                <span className="text-[10px] text-zinc-600 bg-zinc-950 px-1.5 py-0.5 rounded border border-zinc-900">
+                <FaFolder className={`text-sm transition group-hover:scale-115 ${isActive(path) ? "text-violet-400" : "text-white"}`} />
+                <span className="truncate flex-1 text-white">{p.name}</span>
+                <span className="text-[10px] text-white bg-zinc-950 px-1.5 py-0.5 rounded border border-zinc-900 font-mono">
                   {p.songs.length}
                 </span>
               </Link>
@@ -177,8 +177,8 @@ function Sidebar({ menuOpen, setMenuOpen, playlists = [], createPlaylist, user, 
 
       {/* FOOTER ACCENT */}
       <div className="relative p-4 rounded-2xl bg-zinc-900/40 border border-zinc-900 text-center overflow-hidden flex-shrink-0">
-        <div className="absolute -top-12 -left-12 w-24 h-24 bg-violet-600/10 blur-xl rounded-full" />
-        <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">LESSO Tunes Space</p>
+        <div className="absolute -top-12 -left-12 w-24 h-24 bg-violet-600/15 blur-xl rounded-full" />
+        <p className="text-[10px] text-violet-400 uppercase tracking-widest font-bold">LESSO Tunes Space</p>
       </div>
 
     </div>
@@ -188,13 +188,13 @@ function Sidebar({ menuOpen, setMenuOpen, playlists = [], createPlaylist, user, 
           {/* Backdrop */}
           <div 
             onClick={handleClose} 
-            className="absolute inset-0 bg-black/75 backdrop-blur-sm transition-opacity"
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
           />
           
           {/* Modal Content */}
-          <div className="relative bg-zinc-950 border border-zinc-800/80 rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl shadow-black/80 transform transition-all scale-100 animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative bg-[#09070f] border border-violet-500/30 rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl shadow-black/90 transform transition-all scale-100 animate-in fade-in zoom-in-95 duration-200">
             {/* Glowing top-right aura */}
-            <div className="absolute -top-12 -right-12 w-32 h-32 bg-violet-600/10 blur-2xl rounded-full pointer-events-none" />
+            <div className="absolute -top-12 -right-12 w-32 h-32 bg-violet-600/20 blur-2xl rounded-full pointer-events-none" />
             
             <h3 className="text-xl font-black text-white tracking-wide mb-2 flex items-center gap-2">
               <FaFolder className="text-violet-500" /> Create Playlist
@@ -210,7 +210,7 @@ function Sidebar({ menuOpen, setMenuOpen, playlists = [], createPlaylist, user, 
                   placeholder="My playlist #1"
                   value={playlistName}
                   onChange={(e) => setPlaylistName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-500 font-semibold text-sm focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all duration-200"
+                  className="w-full px-4 py-3 rounded-xl bg-zinc-900/80 border border-zinc-800 text-white placeholder-zinc-500 font-semibold text-sm focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all duration-200"
                   autoFocus
                   required
                 />
@@ -226,7 +226,7 @@ function Sidebar({ menuOpen, setMenuOpen, playlists = [], createPlaylist, user, 
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-lg shadow-violet-950/40 hover:scale-[1.02] active:scale-95 transition-all duration-200"
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-extrabold text-xs shadow-lg shadow-violet-950/40 hover:scale-[1.02] active:scale-95 transition-all duration-200"
                 >
                   Create Playlist
                 </button>

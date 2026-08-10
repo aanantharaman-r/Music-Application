@@ -158,7 +158,7 @@ function Auth({ onAuthSuccess, onClose }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 mt-2 rounded-xl bg-white hover:bg-zinc-200 text-black font-extrabold text-sm shadow-xl active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
+            className="w-full py-3.5 mt-2 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-extrabold text-sm shadow-xl active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
           >
             {loading ? "Processing..." : isLogin ? "Login" : "Sign Up"}
           </button>

@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react"
 import YouTube from "react-youtube"
 import Lyrics from "./Lyrics"
+import RightPanel from "./RightPanel"
 import rdrBackground from "../assets/rdr2_background.png"
 
 import {
@@ -227,6 +228,32 @@ function Player({
 
   return (
     <>
+      {/* 3RD COLUMN: PERSISTENT RIGHT PANEL FOR DESKTOP */}
+      <RightPanel
+        currentSong={currentSong}
+        playing={playing}
+        togglePlay={togglePlay}
+        prevSong={prevSong}
+        nextSong={nextSong}
+        progress={progress}
+        duration={duration}
+        formatTime={formatTime}
+        setProgress={setProgress}
+        audioRef={audioRef}
+        playerRef={playerRef}
+        isShuffle={isShuffle}
+        setIsShuffle={setIsShuffle}
+        repeat={repeat}
+        setRepeat={setRepeat}
+        isFav={isFav}
+        toggleFavorite={toggleFavorite}
+        currentQueue={currentQueue}
+        setCurrentSong={setCurrentSong}
+        setCurrentIndex={setCurrentIndex}
+        setActiveSongId={setActiveSongId}
+        showToast={showToast}
+      />
+
       {/* HTML5 Audio player for JioSaavn */}
       <audio
         ref={audioRef}
@@ -280,7 +307,7 @@ function Player({
                             }}
                             className={`w-full text-left text-xs font-semibold px-2 py-1.5 rounded-lg flex items-center gap-2 transition-colors ${
                               isPlaying 
-                                ? "bg-violet-600 text-white" 
+                                ? "bg-violet-600 text-white font-bold" 
                                 : "text-zinc-300 hover:bg-zinc-900 hover:text-white"
                             }`}
                           >
@@ -301,9 +328,9 @@ function Player({
 
             {/* ALBUM ART - COOL ANIMATED CARD */}
             <div className="flex-1 flex items-center justify-center my-4">
-              <div className={`relative w-72 h-72 sm:w-80 sm:h-80 rounded-[2rem] overflow-hidden border-2 border-zinc-800 shadow-2xl transition-all duration-700 ${playing ? 'scale-100 rotate-1' : 'scale-[0.96]'}`}>
+              <div className={`relative w-72 h-72 sm:w-80 sm:h-80 rounded-[2rem] overflow-hidden border-2 border-zinc-800/80 shadow-2xl transition-all duration-700 ${playing ? 'scale-100 rotate-1' : 'scale-[0.96]'}`}>
                 {/* Vinyl overlay backing glow */}
-                <div className={`absolute -inset-1.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-[2rem] blur opacity-30 ${playing ? 'animate-pulse' : 'opacity-10'}`} />
+                <div className={`absolute -inset-1.5 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-[2rem] blur opacity-40 ${playing ? 'animate-pulse' : 'opacity-10'}`} />
                 <img 
                   src={currentSong.image} 
                   alt="" 
@@ -421,7 +448,7 @@ function Player({
                 {/* Main Play/Pause */}
                 <button
                   onClick={togglePlay}
-                  className="w-16 h-16 rounded-full flex items-center justify-center bg-red-600 hover:bg-red-500 text-white shadow-[0_0_20px_rgba(220,38,38,0.4)] active:scale-95 transition-all"
+                  className="w-16 h-16 rounded-full flex items-center justify-center bg-white text-black shadow-[0_0_25px_rgba(255,255,255,0.6)] hover:scale-105 active:scale-95 transition-all font-bold"
                 >
                   {playing ? <FaPause className="text-lg" /> : <FaPlay className="text-lg ml-1" />}
                 </button>
@@ -440,7 +467,7 @@ function Player({
                     setIsShuffle(!isShuffle)
                     showToast(isShuffle ? "Shuffle Off" : "Shuffle On")
                   }}
-                  className={`p-2 transition-colors ${isShuffle ? "text-violet-500" : "text-zinc-400"}`}
+                  className={`p-2 transition-colors ${isShuffle ? "text-violet-400" : "text-zinc-400"}`}
                 >
                   <FaRandom className="text-lg" />
                 </button>
@@ -451,7 +478,7 @@ function Player({
                 {/* Loop */}
                 <button 
                   onClick={() => setRepeat(!repeat)}
-                  className={`p-2 transition-colors ${repeat ? "text-violet-500" : "text-zinc-400"}`}
+                  className={`p-2 transition-colors ${repeat ? "text-violet-400" : "text-zinc-400"}`}
                 >
                   <svg className="w-5.5 h-5.5 fill-current" viewBox="0 0 24 24">
                     <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
@@ -461,13 +488,13 @@ function Player({
                 {/* Lyrics Toggle */}
                 <button 
                   onClick={() => setShowMobileLyrics(!showMobileLyrics)}
-                  className={`p-2 transition-colors ${showMobileLyrics ? "text-violet-500" : "text-zinc-400"}`}
+                  className={`p-2 transition-colors ${showMobileLyrics ? "text-violet-400" : "text-zinc-400"}`}
                 >
                   <FaMusic className="text-lg" />
                 </button>
 
                 {/* Provider Badge */}
-                <span className="text-[10px] px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-500 font-black uppercase tracking-wider">
+                <span className="text-[10px] px-2.5 py-1 rounded bg-violet-600/20 border border-violet-500/30 text-violet-300 font-black uppercase tracking-wider">
                   {currentSong.provider === "jiosaavn" ? "JS" : "YT"}
                 </span>
               </div>
@@ -475,7 +502,7 @@ function Player({
 
             {/* Bottom lyrics slide-up overlay */}
             {showMobileLyrics && (
-              <div className="fixed inset-x-0 bottom-0 top-[20%] bg-[#080809]/98 border-t border-zinc-800/80 rounded-t-[2.5rem] z-50 p-6 flex flex-col animate-in slide-in-from-bottom duration-300 backdrop-blur-xl">
+              <div className="fixed inset-x-0 bottom-0 top-[20%] bg-[#08060c]/98 border-t border-zinc-800/80 rounded-t-[2.5rem] z-50 p-6 flex flex-col animate-in slide-in-from-bottom duration-300 backdrop-blur-xl">
                 <div className="w-12 h-1 bg-zinc-800 rounded-full mx-auto mb-6" onClick={() => setShowMobileLyrics(false)} />
                 <div className="flex-1 overflow-y-auto">
                   <Lyrics currentSong={currentSong} />
@@ -487,7 +514,7 @@ function Player({
           {/* DESKTOP HEADER */}
           <div className="hidden lg:flex items-center justify-between w-full border-b border-zinc-800/50 pb-6 mb-8 z-10">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-full bg-violet-950/40 border border-violet-900/40 text-violet-400">
+              <div className="p-2 rounded-full bg-violet-600/20 border border-violet-500/30 text-violet-400">
                 <FaMusic className="text-sm" />
               </div>
               <span className="text-xs uppercase tracking-[0.2em] font-black text-zinc-400">Now Playing</span>
@@ -495,7 +522,7 @@ function Player({
             
             <button
               onClick={() => setFullscreen(false)}
-              className="p-3.5 rounded-full bg-zinc-950 border border-zinc-850 text-zinc-300 hover:text-white hover:border-violet-650 hover:scale-105 active:scale-95 transition-all duration-200 shadow-md"
+              className="p-3.5 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 hover:text-white hover:border-violet-500/50 hover:scale-105 active:scale-95 transition-all duration-200 shadow-md"
             >
               <FaCompress className="text-sm" />
             </button>
@@ -505,7 +532,7 @@ function Player({
           <div className="hidden lg:flex flex-1 flex-col lg:flex-row items-stretch justify-center max-w-5xl mx-auto w-full mb-6 gap-6 z-10 overflow-y-auto lg:overflow-hidden">
             
             {/* LEFT COLUMN: HUGE ALBUM ART CARD & TITLES */}
-            <div className="w-full lg:w-[48%] flex flex-col items-center justify-center p-6 lg:p-8 border border-zinc-900 bg-zinc-950/40 rounded-[2.5rem] shadow-2xl gap-4 flex-shrink-0">
+            <div className="w-full lg:w-[48%] flex flex-col items-center justify-center p-6 lg:p-8 border border-zinc-800/80 bg-zinc-950/40 rounded-[2.5rem] shadow-2xl gap-4 flex-shrink-0">
               
               {/* Music Card Frame */}
               <div className="relative w-52 h-52 md:w-64 md:h-64 rounded-[2rem] overflow-hidden border border-zinc-800 shadow-2xl flex-shrink-0 group">
@@ -515,7 +542,7 @@ function Player({
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                <span className="absolute bottom-4 left-4 text-[9px] px-2.5 py-1 rounded-full bg-violet-600 border border-violet-500/30 text-white font-black uppercase tracking-widest shadow-md">
+                <span className="absolute bottom-4 left-4 text-[9px] px-2.5 py-1 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-black uppercase tracking-widest shadow-md">
                   {currentSong.provider} Mode
                 </span>
               </div>
@@ -584,7 +611,7 @@ function Player({
                 {/* PLAY / PAUSE */}
                 <button
                   onClick={togglePlay}
-                  className="w-12 h-12 rounded-full flex items-center justify-center bg-red-600 hover:bg-red-500 text-white border border-[#eadaa2]/40 shadow-md hover:scale-105 active:scale-95 transition-all duration-150"
+                  className="w-12 h-12 rounded-full flex items-center justify-center bg-white hover:bg-zinc-100 text-black shadow-[0_0_20px_rgba(255,255,255,0.5)] hover:scale-105 active:scale-95 transition-all duration-150"
                 >
                   {playing ? <FaPause className="text-sm" /> : <FaPlay className="text-sm ml-0.5" />}
                 </button>
@@ -604,7 +631,7 @@ function Player({
                     }}
                     className={`w-11 h-11 flex items-center justify-center rounded-full border transition-all duration-200 shadow-md active:scale-95 ${
                       isShuffle 
-                        ? "bg-violet-950/20 border-violet-600 text-violet-500" 
+                        ? "bg-violet-600/20 border-violet-500 text-violet-400" 
                         : "bg-zinc-950/40 border-zinc-800/80 text-zinc-400 hover:text-white"
                     }`}
                     title="Shuffle"
@@ -617,7 +644,7 @@ function Player({
                   onClick={() => setRepeat(!repeat)} 
                   className={`w-11 h-11 flex items-center justify-center rounded-full border transition-all duration-200 shadow-md active:scale-95 ${
                     repeat 
-                      ? "bg-violet-950/20 border-violet-600 text-violet-500" 
+                      ? "bg-violet-600/20 border-violet-500 text-violet-400" 
                       : "bg-zinc-950/40 border-zinc-800/80 text-zinc-400 hover:text-white"
                   }`}
                   title="Loop"
@@ -663,7 +690,7 @@ function Player({
           />
           <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-zinc-800/80 group-hover/slider:h-[4px] transition-all duration-200">
             <div 
-              className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 transition-all duration-100" 
+              className="h-full bg-white group-hover/slider:bg-violet-500 transition-colors duration-200" 
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -684,7 +711,7 @@ function Player({
               <h2 className="font-bold text-white text-xs md:text-sm truncate leading-snug hover:underline">
                 {currentSong.title}
               </h2>
-              <p className="text-zinc-400 text-[10px] md:text-xs truncate mt-0.5 hover:underline">
+              <p className="text-white/90 font-medium text-[10px] md:text-xs truncate mt-0.5 hover:underline">
                 {currentSong.artist}
               </p>
             </div>
@@ -768,7 +795,7 @@ function Player({
                     setIsShuffle(!isShuffle)
                     showToast(isShuffle ? "Shuffle Off" : "Shuffle On")
                   }}
-                  className={`p-1.5 transition-colors ${isShuffle ? "text-violet-500 hover:text-violet-400" : "text-zinc-400 hover:text-white"}`}
+                  className={`p-1.5 transition-colors ${isShuffle ? "text-violet-400 hover:text-violet-300" : "text-zinc-400 hover:text-white"}`}
                   title="Shuffle"
                 >
                   <FaRandom className="text-xs" />
@@ -786,7 +813,7 @@ function Player({
               {/* PLAY / PAUSE BUTTON */}
               <button
                 onClick={togglePlay}
-                className="w-8.5 h-8.5 rounded-full flex items-center justify-center bg-white text-black hover:scale-105 active:scale-95 transition-all shadow-md"
+                className="w-8.5 h-8.5 rounded-full flex items-center justify-center bg-white text-black hover:bg-zinc-100 hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(255,255,255,0.5)] font-bold"
                 title={playing ? "Pause" : "Play"}
               >
                 {playing ? <FaPause className="text-[10px]" /> : <FaPlay className="text-[10px] ml-0.5" />}
@@ -802,7 +829,7 @@ function Player({
 
               <button 
                 onClick={() => setRepeat(!repeat)} 
-                className={`p-1.5 transition-colors ${repeat ? "text-violet-500 hover:text-violet-400" : "text-zinc-400 hover:text-white"}`}
+                className={`p-1.5 transition-colors ${repeat ? "text-violet-400 hover:text-violet-300" : "text-zinc-400 hover:text-white"}`}
                 title="Repeat"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -832,7 +859,7 @@ function Player({
                 }}
                 className="w-full custom-slider"
                 style={{
-                  background: `linear-gradient(to right, var(--slider-active, #ffffff) 0%, var(--slider-active, #ffffff) ${progressPercent}%, var(--slider-bg, rgba(255, 255, 255, 0.1)) ${progressPercent}%, var(--slider-bg, rgba(255, 255, 255, 0.1)) 100%)`
+                  background: `linear-gradient(to right, var(--slider-active, #ffffff) 0%, var(--slider-active, #ffffff) ${progressPercent}%, var(--slider-bg, rgba(255, 255, 255, 0.2)) ${progressPercent}%, var(--slider-bg, rgba(255, 255, 255, 0.2)) 100%)`
                 }}
               />
               <span className="text-[10px] font-medium text-zinc-500 min-w-[28px] font-mono select-none">
@@ -844,7 +871,7 @@ function Player({
             <div className="flex md:hidden items-center gap-4">
               <button
                 onClick={togglePlay}
-                className="w-9 h-9 rounded-full flex items-center justify-center bg-white text-black shadow-md active:scale-90 transition-transform"
+                className="w-9 h-9 rounded-full flex items-center justify-center bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.5)] active:scale-90 transition-transform font-bold"
                 title={playing ? "Pause" : "Play"}
               >
                 {playing ? <FaPause className="text-[10px]" /> : <FaPlay className="text-[10px] ml-0.5" />}
@@ -877,7 +904,7 @@ function Player({
               <div className="relative" ref={queueRef}>
                 <button 
                   onClick={() => setShowQueue(!showQueue)}
-                  className={`p-1 transition-colors ${showQueue ? "text-violet-500" : "text-zinc-400 hover:text-white"}`}
+                  className={`p-1 transition-colors ${showQueue ? "text-violet-400" : "text-zinc-400 hover:text-white"}`}
                   title="Queue"
                 >
                   <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -886,8 +913,8 @@ function Player({
                 </button>
 
                 {showQueue && (
-                  <div className="absolute bottom-full right-0 mb-2 bg-zinc-950/95 border border-zinc-800 rounded-xl p-2 w-64 shadow-2xl z-[100] backdrop-blur-md animate-in fade-in slide-in-from-bottom-1">
-                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold p-1.5 border-b border-zinc-900 mb-1">Queue ({currentQueue.length})</p>
+                  <div className="absolute bottom-full right-0 mb-2 bg-[#09070f] border border-violet-500/30 rounded-xl p-2 w-64 shadow-2xl z-[100] backdrop-blur-md animate-in fade-in slide-in-from-bottom-1">
+                    <p className="text-[10px] text-violet-400 uppercase tracking-wider font-bold p-1.5 border-b border-zinc-900 mb-1">Queue ({currentQueue.length})</p>
                     <div className="max-h-60 overflow-y-auto flex flex-col gap-1">
                       {currentQueue.map((song, idx) => {
                         const isPlaying = currentSong?.id === song.id
@@ -902,7 +929,7 @@ function Player({
                             }}
                             className={`w-full text-left text-xs font-semibold px-2 py-1.5 rounded-lg flex items-center gap-2 transition-colors ${
                               isPlaying 
-                                ? "bg-violet-600 text-white" 
+                                ? "bg-violet-600 text-white font-bold" 
                                 : "text-zinc-300 hover:bg-zinc-900 hover:text-white"
                             }`}
                           >
@@ -950,7 +977,7 @@ function Player({
               onChange={(e) => changeVolume(Number(e.target.value))}
               className="w-20 md:w-24 custom-slider"
               style={{
-                background: `linear-gradient(to right, var(--slider-active, #ffffff) 0%, var(--slider-active, #ffffff) ${volumePercent}%, var(--slider-bg, rgba(255, 255, 255, 0.1)) ${volumePercent}%, var(--slider-bg, rgba(255, 255, 255, 0.1)) 100%)`
+                background: `linear-gradient(to right, var(--slider-active, #ffffff) 0%, var(--slider-active, #ffffff) ${volumePercent}%, var(--slider-bg, rgba(255, 255, 255, 0.2)) ${volumePercent}%, var(--slider-bg, rgba(255, 255, 255, 0.2)) 100%)`
               }}
             />
 

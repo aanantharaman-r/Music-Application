@@ -50,8 +50,8 @@ function MusicCard({
           </button>
           
           {showDropdown && (
-            <div className="absolute top-11 left-0 bg-zinc-950/95 border border-zinc-800 rounded-xl p-2 w-48 shadow-2xl z-30 backdrop-blur-md animate-in fade-in slide-in-from-top-1">
-              <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold p-1.5 border-b border-zinc-900 mb-1">Add to Playlist</p>
+            <div className="absolute top-11 left-0 bg-[#09070f] border border-violet-500/30 rounded-xl p-2 w-48 shadow-2xl z-30 backdrop-blur-md animate-in fade-in slide-in-from-top-1">
+              <p className="text-[10px] text-violet-400 uppercase tracking-wider font-bold p-1.5 border-b border-zinc-900 mb-1">Add to Playlist</p>
               <div className="max-h-32 overflow-y-auto">
                 {playlists.map(p => (
                   <button
@@ -79,7 +79,7 @@ function MusicCard({
             e.stopPropagation()
             onRemove()
           }}
-          className="absolute top-4 left-4 z-20 p-2.5 rounded-full bg-violet-950/40 border border-violet-900/30 text-violet-500 hover:bg-violet-600 hover:text-white transition-colors duration-300"
+          className="absolute top-4 left-4 z-20 p-2.5 rounded-full bg-violet-950/40 border border-violet-900/30 text-violet-400 hover:bg-violet-600 hover:text-white transition-colors duration-300"
           title={removeLabel}
         >
           <FaTrash className="text-xs" />
@@ -94,11 +94,11 @@ function MusicCard({
         }}
         className={`absolute top-4 right-4 z-20 p-2.5 rounded-full transition-all duration-300 backdrop-blur-md border 
           ${isFav 
-            ? "bg-violet-500/10 border-violet-500/30 text-violet-400 shadow-md shadow-violet-950/20" 
+            ? "bg-violet-500/15 border-violet-500/30 text-violet-400 shadow-md shadow-violet-950/20" 
             : "bg-black/40 border-zinc-800/40 text-zinc-400 hover:text-white hover:border-zinc-700/80 hover:scale-105"
           }`}
       >
-        {isFav ? <FaHeart className="text-sm scale-110" /> : <FaRegHeart className="text-sm" />}
+        {isFav ? <FaHeart className="text-sm scale-110 text-violet-400" /> : <FaRegHeart className="text-sm" />}
       </button>
 
       {/* IMAGE */}
@@ -130,8 +130,8 @@ function MusicCard({
             className={`
               w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 shadow-xl
               ${isActive
-                ? "bg-white text-violet-600 scale-100"
-                : "bg-violet-600 text-white opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-110 hover:bg-violet-500"
+                ? "bg-white text-violet-600 scale-100 font-bold"
+                : "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-110 hover:bg-violet-500"
               }
             `}
           >
@@ -144,23 +144,17 @@ function MusicCard({
       {/* INFO */}
       <div className="mt-4 px-1">
 
-        <h2 className="text-base font-bold truncate text-white leading-snug group-hover:text-violet-400 transition-colors duration-300">
+        <h2 className="text-base font-bold truncate text-white leading-snug">
           {song.title}
         </h2>
 
-        <p className={`
-          text-xs mt-1 truncate font-medium
-          ${isActive
-            ? "text-violet-400 font-semibold"
-            : "text-zinc-500 group-hover:text-zinc-400"
-          }
-        `}>
+        <p className="text-xs mt-1 truncate font-medium text-white/90">
           {song.artist}
         </p>
 
         {/* ACTIVE VISUALIZER */}
         {isActive && (
-          <div className="flex items-center gap-2 mt-3.5 bg-violet-950/20 py-1.5 px-3 rounded-lg border border-violet-900/30 w-fit">
+          <div className="flex items-center gap-2 mt-3.5 bg-violet-950/40 py-1.5 px-3 rounded-lg border border-violet-900/40 w-fit">
             <span className="text-violet-400 font-bold text-xs">
               Playing
             </span>
