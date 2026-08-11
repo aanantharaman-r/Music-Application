@@ -17,6 +17,7 @@ import logo from "./assets/logo.jpg"
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api"
 
 function App() {
+  const navigate = useNavigate()
 
   const [token, setToken] = useState(localStorage.getItem("aj-token") || "")
   const [user, setUser] = useState(JSON.parse(localStorage.getItem("aj-user") || "null"))
@@ -38,6 +39,21 @@ function App() {
   const [homeLoading, setHomeLoading] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [showAuth, setShowAuth] = useState(false)
+
+  const handleHomeSearchSubmit = (e) => {
+    if (e) e.preventDefault()
+    if (search.trim()) {
+      fetchSongs(search, provider)
+      navigate("/search")
+    }
+  }
+
+  const handleTagClick = (tag) => {
+    const query = tag.toLowerCase()
+    setSearch(query)
+    fetchSongs(query, provider)
+    navigate("/search")
+  }
 
   const [favorites, setFavorites] = useState([])
   const [playlists, setPlaylists] = useState([])
@@ -512,17 +528,77 @@ function App() {
 
       <div className="flex-1 flex flex-col h-screen overflow-y-auto z-10 pb-32 xl:mr-[340px]">
         
-        {/* DESKTOP/MAIN HEADER */}
-        <div className="hidden md:flex items-center justify-end px-8 py-4 bg-zinc-950/40 backdrop-blur-md sticky top-0 z-30 border-b border-zinc-900/50">
-          <div className="relative" ref={profileDropdownRef}>
+        {/* DESKTOP/MAIN HEADER WITH TOP CENTER SEARCH BAR */}
+        <div className="hidden md:flex items-center justify-between gap-4 px-8 py-3.5 bg-zinc-950/70 backdrop-blur-md sticky top-0 z-30 border-b border-zinc-900/60 shadow-lg">
+          {/* LOGO / APP NAME */}
+          <div className="flex items-center gap-2.5 w-48">
+            <img src={logo} alt="Logo" className="w-7 h-7 rounded-lg object-cover" />
+            <span className="text-xs font-black tracking-widest text-white uppercase">
+              LESSO <span className="text-violet-500">TUNES</span>
+            </span>
+          </div>
+
+          {/* TOP CENTER SEARCH BOX */}
+          <form onSubmit={handleHomeSearchSubmit} className="flex-1 max-w-xl mx-auto">
+            <div className="flex items-center gap-2.5 w-full bg-zinc-900/90 border border-zinc-800/80 rounded-full px-4 py-1.5 focus-within:border-violet-500/80 focus-within:ring-2 focus-within:ring-violet-950 transition-all duration-300 shadow-inner group">
+              <FaSearch className="text-zinc-400 text-sm flex-shrink-0 group-focus-within:text-violet-400" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search songs, artists, albums..."
+                spellCheck={false}
+                autoComplete="off"
+                className="w-full bg-transparent outline-none border-none text-white text-xs sm:text-sm placeholder-zinc-500"
+              />
+
+              {/* PROVIDER TOGGLE PILLS */}
+              <div className="flex bg-zinc-950 border border-zinc-800/90 p-0.5 rounded-full flex-shrink-0 text-[10px] font-extrabold">
+                <button
+                  type="button"
+                  onClick={() => setProvider("jiosaavn")}
+                  className={`px-2.5 py-1 rounded-full transition-all ${
+                    provider === "jiosaavn"
+                      ? "bg-violet-600 text-white shadow"
+                      : "text-zinc-400 hover:text-zinc-200"
+                  }`}
+                  title="JioSaavn Audio"
+                >
+                  Saavn
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setProvider("youtube")}
+                  className={`px-2.5 py-1 rounded-full transition-all ${
+                    provider === "youtube"
+                      ? "bg-violet-600 text-white shadow"
+                      : "text-zinc-400 hover:text-zinc-200"
+                  }`}
+                  title="YouTube Video"
+                >
+                  YouTube
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                className="flex-shrink-0 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white text-xs font-bold px-3.5 py-1 rounded-full transition-all shadow-md"
+              >
+                Search
+              </button>
+            </div>
+          </form>
+
+          {/* RIGHT: PROFILE DROPDOWN */}
+          <div className="relative w-48 flex justify-end" ref={profileDropdownRef}>
             <button 
               onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-              className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800/80 hover:border-violet-500/50 text-zinc-300 hover:text-white transition-all duration-300 group shadow-md"
+              className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900 border border-zinc-800/80 hover:border-violet-500/50 text-zinc-300 hover:text-white transition-all duration-300 group shadow-md"
             >
-              <FaUser className="text-sm group-hover:scale-110 transition-transform text-violet-400" />
+              <FaUser className="text-xs group-hover:scale-110 transition-transform text-violet-400" />
               {user ? (
-                <span className="text-xs font-black tracking-wide">
-                  Hi, {user.username}
+                <span className="text-xs font-black tracking-wide truncate max-w-[90px]">
+                  {user.username}
                 </span>
               ) : (
                 <span className="text-xs font-black tracking-wide">
@@ -559,105 +635,108 @@ function App() {
           </div>
         </div>
         
-        <div className="flex md:hidden items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-900 backdrop-blur-md sticky top-0 z-30">
-          {/* LEFT: MOBILE MENU TRIGGER */}
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => setMenuOpen(true)}
-              className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-violet-400 hover:bg-zinc-800 transition"
-            >
-              ☰
-            </button>
-            <img src={logo} alt="Logo" className="w-8 h-8 rounded-lg object-cover hidden sm:block" />
+        {/* MOBILE HEADER WITH TOP CENTER SEARCH BAR */}
+        <div className="flex md:hidden flex-col gap-2 px-4 py-3 bg-zinc-950/90 border-b border-zinc-900 backdrop-blur-md sticky top-0 z-30">
+          <div className="flex items-center justify-between">
+            {/* LEFT: MOBILE MENU TRIGGER */}
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setMenuOpen(true)}
+                className="p-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-violet-400 hover:bg-zinc-800 transition"
+              >
+                ☰
+              </button>
+              <img src={logo} alt="Logo" className="w-7 h-7 rounded-lg object-cover" />
+            </div>
+
+            {/* RIGHT: PROFILE DROPDOWN */}
+            <div className="relative" ref={mobileProfileDropdownRef}>
+              <button 
+                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400"
+              >
+                <FaUser className="text-xs text-violet-400" />
+                {user && (
+                  <span className="text-[10px] font-bold text-zinc-300">
+                    Hi, {user.username}
+                  </span>
+                )}
+              </button>
+              
+              {showProfileDropdown && (
+                <div className="absolute right-0 top-9 bg-zinc-950/95 border border-zinc-800 rounded-xl p-1.5 w-32 shadow-2xl z-30 backdrop-blur-md">
+                  {user ? (
+                    <button
+                      onClick={() => {
+                        handleLogout()
+                        setShowProfileDropdown(false)
+                      }}
+                      className="w-full text-left text-xs font-bold px-2 py-1.5 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
+                    >
+                      Logout
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setShowAuth(true)
+                        setShowProfileDropdown(false)
+                      }}
+                      className="w-full text-left text-xs font-bold px-2 py-1.5 rounded-lg text-violet-400 hover:bg-violet-500/10 transition-colors"
+                    >
+                      Login
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* RIGHT: PROFILE DROPDOWN */}
-          <div className="relative" ref={mobileProfileDropdownRef}>
-            <button 
-              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400"
-            >
-              <FaUser className="text-xs text-violet-400" />
-              {user && (
-                <span className="text-[10px] font-bold text-zinc-300">
-                  Hi, {user.username}
-                </span>
-              )}
-            </button>
-            
-            {showProfileDropdown && (
-              <div className="absolute right-0 top-9 bg-zinc-950/95 border border-zinc-800 rounded-xl p-1.5 w-32 shadow-2xl z-30 backdrop-blur-md">
-                {user ? (
-                  <button
-                    onClick={() => {
-                      handleLogout()
-                      setShowProfileDropdown(false)
-                    }}
-                    className="w-full text-left text-xs font-bold px-2 py-1.5 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
-                  >
-                    Logout
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setShowAuth(true)
-                      setShowProfileDropdown(false)
-                    }}
-                    className="w-full text-left text-xs font-bold px-2 py-1.5 rounded-lg text-violet-400 hover:bg-violet-500/10 transition-colors"
-                  >
-                    Login
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+          {/* MOBILE TOP CENTER SEARCH BOX */}
+          <form onSubmit={handleHomeSearchSubmit} className="w-full mt-1">
+            <div className="flex items-center gap-2 w-full bg-zinc-900/90 border border-zinc-800 rounded-full px-3.5 py-1.5 focus-within:border-violet-500">
+              <FaSearch className="text-zinc-400 text-xs flex-shrink-0" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search music..."
+                spellCheck={false}
+                autoComplete="off"
+                className="w-full bg-transparent outline-none border-none text-white text-xs placeholder-zinc-500"
+              />
+              <button
+                type="submit"
+                className="flex-shrink-0 bg-violet-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full"
+              >
+                Search
+              </button>
+            </div>
+          </form>
         </div>
 
         <Routes>
           <Route path="/" element={
-            <div className="p-6 md:p-8 min-h-full">
+            <div className="p-4 md:p-8 min-h-full">
 
-              {/* WELCOME BANNER */}
-              <div className="relative overflow-hidden rounded-3xl border border-zinc-800/80 bg-gradient-to-br from-violet-600/10 via-zinc-950 to-fuchsia-950/10 p-8 md:p-10 mb-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl group hover:border-violet-500/30 transition-all duration-500">
-                {/* Glowing decor */}
-                <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-violet-600/20 rounded-full blur-3xl pointer-events-none group-hover:bg-violet-600/30 transition-all duration-500" />
-                <div className="absolute -left-10 -top-10 w-48 h-48 bg-fuchsia-600/10 rounded-full blur-3xl pointer-events-none" />
-                
-                <div className="z-10 text-center md:text-left">
-                  <span className="px-3.5 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-xs font-black text-violet-400 uppercase tracking-widest">
-                    ✨ {greeting}, listener
-                  </span>
-                  <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight mt-4 uppercase welcome-title">
-                    Your Personal <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-500 to-rose-400 drop-shadow-[0_0_15px_rgba(139,92,246,0.3)]">Audio Frontier</span>
-                  </h1>
-                  <p className="text-white text-sm mt-3.5 max-w-md font-medium">
-                    Explore ad-free music, curated custom categories, and save your favorites in one beautifully designed, responsive app.
-                  </p>
+              {/* HERO BANNER */}
+              <div className="relative overflow-hidden rounded-3xl border border-zinc-800/80 bg-gradient-to-br from-violet-900/20 via-zinc-950 to-fuchsia-950/20 p-6 md:p-10 mb-8 md:mb-12 text-center flex flex-col items-center justify-center shadow-2xl group hover:border-violet-500/30 transition-all duration-500">
+                {/* Background Glows */}
+                <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-violet-600/15 rounded-full blur-3xl pointer-events-none group-hover:bg-violet-600/25 transition-all duration-500" />
+                <div className="absolute -bottom-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-fuchsia-600/10 rounded-full blur-3xl pointer-events-none" />
 
-                  <div className="flex flex-wrap gap-3 mt-6 justify-center md:justify-start">
-                    <Link
-                      to="/search"
-                      className="px-6 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-black text-sm shadow-lg shadow-violet-950/40 hover:scale-[1.02] active:scale-95 transition-all duration-300"
-                    >
-                      🚀 Open Search
-                    </Link>
-                    {favorites.length > 0 && (
-                      <button
-                        onClick={playFavoritesRandom}
-                        className="px-6 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 font-bold text-sm flex items-center gap-2 hover:scale-[1.02] active:scale-95 transition-all duration-300"
-                      >
-                        <FaRandom className="text-xs text-violet-400" /> Shuffle Favorites
-                      </button>
-                    )}
-                  </div>
-                </div>
+                {/* Greeting Badge */}
+                <span className="px-3.5 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-xs font-black text-violet-400 uppercase tracking-widest mb-3 z-10">
+                  ✨ {greeting}, listener
+                </span>
 
-                {/* STATS WIDGET */}
-                <div className="z-10 flex flex-col items-center justify-center p-6 bg-zinc-900/40 backdrop-blur-md border border-zinc-800/80 rounded-2xl min-w-[200px] shadow-lg shadow-black/40 group-hover:border-violet-500/20 transition-all duration-500">
-                  <FaHeart className="text-3xl text-violet-500 mb-2.5 animate-pulse" />
-                  <span className="text-3xl font-black text-white">{favorites.length}</span>
-                  <span className="text-[10px] text-zinc-500 font-extrabold uppercase tracking-widest mt-1">Liked Songs</span>
-                </div>
+                {/* Main Title */}
+                <h1 className="text-2xl sm:text-4xl md:text-6xl font-black tracking-tight leading-tight uppercase welcome-title z-10 max-w-3xl">
+                  Your Personal <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-500 to-rose-400 drop-shadow-[0_0_20px_rgba(139,92,246,0.4)]">Audio Frontier</span>
+                </h1>
+
+                <p className="text-zinc-400 text-xs sm:text-sm md:text-base mt-2 md:mt-3 max-w-xl font-medium z-10">
+                  Explore ad-free music, curated custom categories, and save your favorites in one place.
+                </p>
               </div>
 
               {/* CURRENT PLAY ACTIVE GLOW VISUALIZER (Top of Curated Mixes) */}
