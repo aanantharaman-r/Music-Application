@@ -4,6 +4,7 @@ import cors from "cors"
 import dotenv from "dotenv"
 import authRoutes from "./routes/auth.js"
 import playlistRoutes from "./routes/playlists.js"
+import saavnRoutes from "./routes/saavn.js"
 
 dotenv.config()
 
@@ -16,6 +17,7 @@ app.use(express.json())
 // Routes
 app.use("/api/auth", authRoutes)
 app.use("/api/playlists", playlistRoutes)
+app.use("/api/saavn", saavnRoutes)
 
 // Default root route
 app.get("/", (req, res) => {
