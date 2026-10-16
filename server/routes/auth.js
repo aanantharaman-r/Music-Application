@@ -1,13 +1,22 @@
 import express from "express"
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose"
 import User from "../models/User.js"
+import authMiddleware from "../middleware/authMiddleware.js"
 
 const router = express.Router()
+
+// Helper function to safely escape regex characters
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 
 // Register a new user
 router.post("/register", async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ message: "Database is not connected. Please check your MongoDB server." })
+    }
+
     const { username, password } = req.body
 
     if (!username || !password) {
@@ -22,7 +31,8 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ message: "Password must be at least 6 characters." })
     }
 
-    const existingUser = await User.findOne({ username: { $regex: new RegExp(`^${username}$`, "i") } })
+    const safeUsername = escapeRegex(username.trim())
+    const existingUser = await User.findOne({ username: { $regex: new RegExp(`^${safeUsername}$`, "i") } })
     if (existingUser) {
       return res.status(400).json({ message: "Username already exists." })
     }
@@ -31,8 +41,9 @@ router.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt)
 
     const newUser = new User({
-      username,
-      password: hashedPassword
+      username: username.trim(),
+      password: hashedPassword,
+      favorites: []
     })
 
     const savedUser = await newUser.save()
@@ -46,25 +57,31 @@ router.post("/register", async (req, res) => {
       token,
       user: {
         id: savedUser._id,
-        username: savedUser.username
+        username: savedUser.username,
+        favorites: savedUser.favorites || []
       }
     })
   } catch (error) {
     console.error("Register error:", error)
-    res.status(500).json({ message: "Server error" })
+    res.status(500).json({ message: error.message || "Server error during registration" })
   }
 })
 
 // Login a user
 router.post("/login", async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ message: "Database is not connected. Please check your MongoDB server." })
+    }
+
     const { username, password } = req.body
 
     if (!username || !password) {
       return res.status(400).json({ message: "Please enter all fields." })
     }
 
-    const user = await User.findOne({ username: { $regex: new RegExp(`^${username}$`, "i") } })
+    const safeUsername = escapeRegex(username.trim())
+    const user = await User.findOne({ username: { $regex: new RegExp(`^${safeUsername}$`, "i") } })
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials." })
     }
@@ -84,11 +101,59 @@ router.post("/login", async (req, res) => {
       token,
       user: {
         id: user._id,
-        username: user.username
+        username: user.username,
+        favorites: user.favorites || []
       }
     })
   } catch (error) {
     console.error("Login error:", error)
+    res.status(500).json({ message: error.message || "Server error during login" })
+  }
+})
+
+// Get current logged-in user profile & favorites from MongoDB
+router.get("/me", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password")
+    if (!user) {
+      return res.status(404).json({ message: "User not found" })
+    }
+    res.json({
+      id: user._id,
+      username: user.username,
+      favorites: user.favorites || []
+    })
+  } catch (error) {
+    console.error("Get user error:", error)
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
+// Update user favorites in MongoDB
+router.put("/favorites", authMiddleware, async (req, res) => {
+  try {
+    const { favorites } = req.body
+    if (!Array.isArray(favorites)) {
+      return res.status(400).json({ message: "Favorites must be an array" })
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { favorites },
+      { new: true }
+    ).select("-password")
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" })
+    }
+
+    res.json({
+      id: user._id,
+      username: user.username,
+      favorites: user.favorites || []
+    })
+  } catch (error) {
+    console.error("Update favorites error:", error)
     res.status(500).json({ message: "Server error" })
   }
 })

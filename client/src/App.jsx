@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react"
-import { FaChartBar, FaHeart, FaPlay, FaRandom, FaUser, FaMusic, FaSearch } from "react-icons/fa"
-import { Routes, Route, Link, useNavigate } from "react-router-dom"
+import { FaChartBar, FaHeart, FaPlay, FaRandom, FaUser, FaMusic, FaSearch, FaHome } from "react-icons/fa"
+import { Routes, Route, Link, useNavigate, useLocation } from "react-router-dom"
 import axios from "axios"
 
 import Sidebar from "./components/Sidebar"
@@ -18,6 +18,7 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api"
 
 function App() {
   const navigate = useNavigate()
+  const location = useLocation()
 
   const [token, setToken] = useState(localStorage.getItem("aj-token") || "")
   const [user, setUser] = useState(JSON.parse(localStorage.getItem("aj-user") || "null"))
@@ -107,15 +108,38 @@ function App() {
     else setGreeting("Good night")
   }, [])
 
-  // Load favorites & playlists
+  // Load local favorites for guest or initial state
   useEffect(() => {
-    const savedFav = localStorage.getItem("aj-favorites")
-    if (savedFav) setFavorites(JSON.parse(savedFav))
-  }, [])
+    if (!token) {
+      const savedFav = localStorage.getItem("aj-favorites")
+      if (savedFav) setFavorites(JSON.parse(savedFav))
+    }
+  }, [token])
 
   useEffect(() => {
-    localStorage.setItem("aj-favorites", JSON.stringify(favorites))
-  }, [favorites])
+    if (!token) {
+      localStorage.setItem("aj-favorites", JSON.stringify(favorites))
+    }
+  }, [favorites, token])
+
+  // Fetch user profile & favorites from MongoDB
+  const fetchUserData = async () => {
+    if (token) {
+      try {
+        const res = await axios.get(`${API_URL}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        if (res.data) {
+          setUser({ id: res.data.id, username: res.data.username })
+          if (Array.isArray(res.data.favorites)) {
+            setFavorites(res.data.favorites)
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching user data from MongoDB:", err)
+      }
+    }
+  }
 
   // Fetch playlists from server or localStorage
   const fetchPlaylists = async () => {
@@ -138,6 +162,7 @@ function App() {
 
   useEffect(() => {
     if (token) {
+      fetchUserData()
       fetchPlaylists()
     } else {
       const saved = localStorage.getItem("aj-guest-playlists")
@@ -158,6 +183,25 @@ function App() {
       localStorage.setItem("aj-guest-playlists", JSON.stringify(playlists))
     }
   }, [playlists, token])
+
+  const updateFavorites = (valOrFn) => {
+    setFavorites(prev => {
+      const next = typeof valOrFn === "function" ? valOrFn(prev) : valOrFn
+      if (token) {
+        axios.put(`${API_URL}/auth/favorites`, { favorites: next }, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).catch(err => console.error("Error updating favorites in MongoDB:", err))
+      }
+      return next
+    })
+  }
+
+  const toggleFavorite = (song) => {
+    updateFavorites(prev => {
+      const exists = prev.some(f => f.id === song.id)
+      return exists ? prev.filter(f => f.id !== song.id) : [...prev, song]
+    })
+  }
 
   // Custom Playlist Helpers
   const createPlaylist = async (name) => {
@@ -429,9 +473,13 @@ function App() {
   const handleAuthSuccess = (newToken, newUser) => {
     setToken(newToken)
     setUser(newUser)
+    if (newUser && Array.isArray(newUser.favorites)) {
+      setFavorites(newUser.favorites)
+    }
     localStorage.setItem("aj-token", newToken)
     localStorage.setItem("aj-user", JSON.stringify(newUser))
     setShowAuth(false)
+    showToast(`Welcome back, ${newUser.username}!`)
   }
 
   const handleLogout = () => {
@@ -526,7 +574,7 @@ function App() {
       />
 
 
-      <div className="flex-1 flex flex-col h-screen overflow-y-auto z-10 pb-32 xl:mr-[340px]">
+      <div className="flex-1 flex flex-col h-screen overflow-y-auto z-10 pb-40 md:pb-28 xl:mr-[340px]">
         
         {/* DESKTOP/MAIN HEADER WITH TOP CENTER SEARCH BAR */}
         <div className="hidden md:flex items-center justify-between gap-4 px-8 py-3.5 bg-zinc-950/70 backdrop-blur-md sticky top-0 z-30 border-b border-zinc-900/60 shadow-lg">
@@ -716,65 +764,65 @@ function App() {
 
         <Routes>
           <Route path="/" element={
-            <div className="p-4 md:p-8 min-h-full">
+            <div className="p-3 sm:p-5 md:p-8 min-h-full">
 
-              {/* HERO BANNER */}
-              <div className="relative overflow-hidden rounded-3xl border border-zinc-800/80 bg-gradient-to-br from-violet-900/20 via-zinc-950 to-fuchsia-950/20 p-6 md:p-10 mb-8 md:mb-12 text-center flex flex-col items-center justify-center shadow-2xl group hover:border-violet-500/30 transition-all duration-500">
+              {/* HERO BANNER - COMPACT & PUNCHY ON MOBILE */}
+              <div className="relative overflow-hidden rounded-2xl md:rounded-3xl border border-zinc-800/80 bg-gradient-to-br from-violet-900/20 via-zinc-950 to-fuchsia-950/20 p-4 sm:p-6 md:p-10 mb-4 sm:mb-6 md:mb-12 text-center flex flex-col items-center justify-center shadow-2xl group hover:border-violet-500/30 transition-all duration-500">
                 {/* Background Glows */}
                 <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-violet-600/15 rounded-full blur-3xl pointer-events-none group-hover:bg-violet-600/25 transition-all duration-500" />
                 <div className="absolute -bottom-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-fuchsia-600/10 rounded-full blur-3xl pointer-events-none" />
 
                 {/* Greeting Badge */}
-                <span className="px-3.5 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-xs font-black text-violet-400 uppercase tracking-widest mb-3 z-10">
+                <span className="px-2.5 sm:px-3.5 py-0.5 sm:py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-[10px] sm:text-xs font-black text-violet-400 uppercase tracking-widest mb-2 sm:mb-3 z-10">
                   ✨ {greeting}, listener
                 </span>
 
                 {/* Main Title */}
-                <h1 className="text-2xl sm:text-4xl md:text-6xl font-black tracking-tight leading-tight uppercase welcome-title z-10 max-w-3xl">
+                <h1 className="text-xl sm:text-3xl md:text-5xl lg:text-6xl font-black tracking-tight leading-tight uppercase welcome-title z-10 max-w-3xl">
                   Your Personal <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-500 to-rose-400 drop-shadow-[0_0_20px_rgba(139,92,246,0.4)]">Audio Frontier</span>
                 </h1>
 
-                <p className="text-zinc-400 text-xs sm:text-sm md:text-base mt-2 md:mt-3 max-w-xl font-medium z-10">
+                <p className="text-zinc-400 text-[11px] sm:text-xs md:text-base mt-1.5 sm:mt-2 md:mt-3 max-w-xl font-medium z-10">
                   Explore ad-free music, curated custom categories, and save your favorites in one place.
                 </p>
               </div>
 
               {/* CURRENT PLAY ACTIVE GLOW VISUALIZER (Top of Curated Mixes) */}
               {currentSong && (
-                <div className="mb-10 p-4 md:p-6 rounded-2xl bg-gradient-to-r from-zinc-900/40 via-[#08060c] to-violet-950/20 border border-zinc-800/80 backdrop-blur-md flex items-center justify-between w-full shadow-xl gap-4">
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <img src={currentSong.image} alt="" className="w-12 h-12 md:w-16 md:h-16 rounded-xl object-cover glow-pulse flex-shrink-0" />
+                <div className="mb-4 sm:mb-8 p-3 sm:p-4 md:p-6 rounded-xl md:rounded-2xl bg-gradient-to-r from-zinc-900/40 via-[#08060c] to-violet-950/20 border border-zinc-800/80 backdrop-blur-md flex items-center justify-between w-full shadow-xl gap-3">
+                  <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+                    <img src={currentSong.image} alt="" className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-lg md:rounded-xl object-cover glow-pulse flex-shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-[10px] md:text-xs uppercase tracking-widest text-violet-400 font-bold">Now Playing</p>
-                      <h4 className="font-extrabold text-white text-sm md:text-lg truncate max-w-[160px] sm:max-w-xs md:max-w-md mt-0.5">{currentSong.title}</h4>
-                      <p className="text-zinc-400 text-[10px] md:text-xs truncate mt-0.5">{currentSong.artist}</p>
+                      <p className="text-[9px] sm:text-[10px] md:text-xs uppercase tracking-widest text-violet-400 font-bold">Now Playing</p>
+                      <h4 className="font-extrabold text-white text-xs sm:text-sm md:text-lg truncate max-w-[140px] sm:max-w-xs md:max-w-md mt-0.5">{currentSong.title}</h4>
+                      <p className="text-zinc-400 text-[9px] sm:text-[10px] md:text-xs truncate mt-0.5">{currentSong.artist}</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-end gap-[3px] md:gap-[4px] h-8 md:h-12 flex-shrink-0">
-                    <div className="w-1.5 bg-gradient-to-t from-violet-600 to-fuchsia-500 rounded-full visualizer-bar" style={{ animationDelay: '0.1s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
-                    <div className="w-1.5 bg-gradient-to-t from-violet-600 to-fuchsia-500 rounded-full visualizer-bar-fast" style={{ animationDelay: '0.3s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
-                    <div className="w-1.5 bg-gradient-to-t from-violet-600 to-fuchsia-500 rounded-full visualizer-bar-slow" style={{ animationDelay: '0.5s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
-                    <div className="w-1.5 bg-gradient-to-t from-violet-600 to-fuchsia-500 rounded-full visualizer-bar" style={{ animationDelay: '0.2s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
-                    <div className="w-1.5 bg-gradient-to-t from-violet-600 to-fuchsia-500 rounded-full visualizer-bar-fast" style={{ animationDelay: '0.4s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
+                  <div className="flex items-end gap-[2px] sm:gap-[3px] md:gap-[4px] h-6 sm:h-8 md:h-12 flex-shrink-0">
+                    <div className="w-1 sm:w-1.5 bg-gradient-to-t from-violet-600 to-fuchsia-500 rounded-full visualizer-bar" style={{ animationDelay: '0.1s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
+                    <div className="w-1 sm:w-1.5 bg-gradient-to-t from-violet-600 to-fuchsia-500 rounded-full visualizer-bar-fast" style={{ animationDelay: '0.3s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
+                    <div className="w-1 sm:w-1.5 bg-gradient-to-t from-violet-600 to-fuchsia-500 rounded-full visualizer-bar-slow" style={{ animationDelay: '0.5s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
+                    <div className="w-1 sm:w-1.5 bg-gradient-to-t from-violet-600 to-fuchsia-500 rounded-full visualizer-bar" style={{ animationDelay: '0.2s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
+                    <div className="w-1 sm:w-1.5 bg-gradient-to-t from-violet-600 to-fuchsia-500 rounded-full visualizer-bar-fast" style={{ animationDelay: '0.4s', animationPlayState: isPlaying ? 'running' : 'paused' }}></div>
                   </div>
                 </div>
               )}
 
-              {/* CURATED MIXES GRID */}
-              <div className="mb-10">
-                <h3 className="text-lg font-bold text-zinc-400 uppercase tracking-[2px] mb-4">Curated Mixes</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+              {/* CURATED MIXES GRID - COMPACT FOR HANDY SCROLLING */}
+              <div className="mb-6 sm:mb-10">
+                <h3 className="text-sm sm:text-base md:text-lg font-bold text-zinc-400 uppercase tracking-[2px] mb-2 sm:mb-4">Curated Mixes</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
                   {quickMixes.map((mix) => (
                     <button
                       key={mix.name}
                       onClick={() => playQuickMix(mix)}
-                      className={`relative overflow-hidden p-5 rounded-2xl border border-zinc-800/80 bg-gradient-to-br ${mix.gradient} text-left group hover:border-zinc-700/80 hover:scale-[1.03] transition-all duration-300 shadow-md`}
+                      className={`relative overflow-hidden p-3 sm:p-4 md:p-5 rounded-xl md:rounded-2xl border border-zinc-800/80 bg-gradient-to-br ${mix.gradient} text-left group hover:border-zinc-700/80 hover:scale-[1.02] active:scale-95 transition-all duration-200 shadow-md`}
                     >
-                      <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 blur-2xl rounded-full group-hover:bg-white/10 transition-colors" />
-                      <span className="text-2xl">{mix.icon}</span>
-                      <h4 className="font-extrabold text-white text-base mt-4">{mix.name}</h4>
-                      <p className="text-[10px] text-zinc-400 font-medium uppercase tracking-wider mt-1 group-hover:text-red-400 transition-colors">
+                      <div className="absolute top-0 right-0 w-16 sm:w-24 h-16 sm:h-24 bg-white/5 blur-xl rounded-full group-hover:bg-white/10 transition-colors" />
+                      <span className="text-xl sm:text-2xl">{mix.icon}</span>
+                      <h4 className="font-extrabold text-white text-xs sm:text-sm md:text-base mt-2 sm:mt-3 leading-tight">{mix.name}</h4>
+                      <p className="text-[9px] sm:text-[10px] text-zinc-400 font-medium uppercase tracking-wider mt-0.5 group-hover:text-red-400 transition-colors">
                         Instant Listen
                       </p>
                     </button>
@@ -784,11 +832,11 @@ function App() {
 
               {/* TRENDING HITS */}
               <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-extrabold tracking-tight">Trending Hits</h2>
+                <div className="flex items-center justify-between mb-3 sm:mb-6">
+                  <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold tracking-tight">Trending Hits</h2>
                   <button 
                     onClick={() => fetchHomeSongs("Tamil trending Hits")}
-                    className="text-xs font-bold text-red-500 hover:text-red-400 uppercase tracking-widest transition"
+                    className="text-[10px] sm:text-xs font-bold text-red-500 hover:text-red-400 uppercase tracking-widest transition"
                   >
                     Refresh
                   </button>
@@ -796,12 +844,12 @@ function App() {
 
                 {/* SKELETON */}
                 {homeLoading && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
                     {Array(8).fill(0).map((_, i) => (
-                      <div key={i} className="h-72 bg-zinc-900/30 border border-zinc-800/40 rounded-2xl animate-pulse flex flex-col p-4">
-                        <div className="flex-1 bg-zinc-800/40 rounded-xl mb-4"></div>
-                        <div className="h-5 bg-zinc-800/40 rounded w-3/4 mb-2"></div>
-                        <div className="h-4 bg-zinc-800/40 rounded w-1/2"></div>
+                      <div key={i} className="h-48 sm:h-64 bg-zinc-900/30 border border-zinc-800/40 rounded-xl sm:rounded-2xl animate-pulse flex flex-col p-3">
+                        <div className="flex-1 bg-zinc-800/40 rounded-lg sm:rounded-xl mb-3"></div>
+                        <div className="h-4 bg-zinc-800/40 rounded w-3/4 mb-1.5"></div>
+                        <div className="h-3 bg-zinc-800/40 rounded w-1/2"></div>
                       </div>
                     ))}
                   </div>
@@ -809,7 +857,7 @@ function App() {
 
                 {/* SONGS GRID */}
                 {!homeLoading && homeSongs.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
                     {homeSongs.map((song, i) => (
                       <MusicCard
                         key={song.id}
@@ -822,14 +870,7 @@ function App() {
                           setQueueType("home")
                         }}
                         isActive={activeSongId === song.id}
-                        onFav={() => {
-                          const exists = favorites.find(f => f.id === song.id)
-                          if (exists) {
-                            setFavorites(favorites.filter(f => f.id !== song.id))
-                          } else {
-                            setFavorites([...favorites, song])
-                          }
-                        }}
+                        onFav={() => toggleFavorite(song)}
                         isFav={favorites.some(f => f.id === song.id)}
                         playlists={playlists}
                         addSongToPlaylist={addSongToPlaylist}
@@ -851,7 +892,7 @@ function App() {
               loading={loading}
               fetchSongs={fetchSongs}
               favorites={favorites}
-              setFavorites={setFavorites}
+              setFavorites={updateFavorites}
               setCurrentSong={(song) => {
                 setCurrentSong(song)
                 setCurrentQueue(songs)
@@ -885,14 +926,7 @@ function App() {
               setActiveSongId={setActiveSongId}
               setCurrentIndex={setCurrentIndex}
               activeSongId={activeSongId}
-              onFav={(song) => {
-                const exists = favorites.find(f => f.id === song.id)
-                if (exists) {
-                  setFavorites(favorites.filter(f => f.id !== song.id))
-                } else {
-                  setFavorites([...favorites, song])
-                }
-              }}
+              onFav={(song) => toggleFavorite(song)}
               favorites={favorites}
               isPlaying={isPlaying}
             />
@@ -908,9 +942,7 @@ function App() {
               }}
               setActiveSongId={setActiveSongId}
               setCurrentIndex={setCurrentIndex}
-              onFav={(song) => {
-                setFavorites(favorites.filter(f => f.id !== song.id))
-              }}
+              onFav={(song) => toggleFavorite(song)}
               activeSongId={activeSongId}
               playlists={playlists}
               addSongToPlaylist={addSongToPlaylist}
@@ -920,13 +952,68 @@ function App() {
         </Routes>
       </div>
 
+      {/* MOBILE BOTTOM NAVIGATION BAR */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#08070b]/95 border-t border-zinc-800/80 backdrop-blur-xl flex items-center justify-around h-[56px] px-2 shadow-2xl safe-area-bottom">
+        <Link 
+          to="/"
+          className={`flex flex-col items-center justify-center flex-1 py-1 transition-all ${
+            location.pathname === "/" ? "text-violet-400 font-bold scale-105" : "text-zinc-500 hover:text-zinc-300"
+          }`}
+        >
+          <FaHome className="text-lg" />
+          <span className="text-[10px] mt-0.5 tracking-wide">Home</span>
+        </Link>
+
+        <Link 
+          to="/search"
+          className={`flex flex-col items-center justify-center flex-1 py-1 transition-all ${
+            location.pathname === "/search" ? "text-violet-400 font-bold scale-105" : "text-zinc-500 hover:text-zinc-300"
+          }`}
+        >
+          <FaSearch className="text-base" />
+          <span className="text-[10px] mt-0.5 tracking-wide">Search</span>
+        </Link>
+
+        <Link 
+          to="/favorites"
+          className={`flex flex-col items-center justify-center flex-1 py-1 transition-all ${
+            location.pathname === "/favorites" ? "text-violet-400 font-bold scale-105" : "text-zinc-500 hover:text-zinc-300"
+          }`}
+        >
+          <div className="relative">
+            <FaHeart className="text-base" />
+            {favorites.length > 0 && (
+              <span className="absolute -top-1 -right-2 bg-rose-500 text-white text-[9px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center">
+                {favorites.length > 99 ? "99+" : favorites.length}
+              </span>
+            )}
+          </div>
+          <span className="text-[10px] mt-0.5 tracking-wide">Favorites</span>
+        </Link>
+
+        {playlists.length > 0 && (
+          <button 
+            onClick={() => setMenuOpen(true)}
+            className="flex flex-col items-center justify-center flex-1 py-1 text-zinc-500 hover:text-zinc-300 transition-all"
+          >
+            <div className="relative">
+              <FaMusic className="text-base" />
+              <span className="absolute -top-1 -right-2 bg-violet-600 text-white text-[9px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center">
+                {playlists.length}
+              </span>
+            </div>
+            <span className="text-[10px] mt-0.5 tracking-wide">Playlists</span>
+          </button>
+        )}
+      </nav>
+
       <Player
         currentSong={currentSong}
         nextSong={nextSong}
         prevSong={prevSong}
         setCurrentSong={setCurrentSong}
         favorites={favorites}
-        setFavorites={setFavorites}
+        setFavorites={updateFavorites}
         playlists={playlists}
         addSongToPlaylist={addSongToPlaylist}
         currentQueue={currentQueue}

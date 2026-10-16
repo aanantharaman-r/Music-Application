@@ -274,3 +274,14 @@
 .rotate-animation {
   animation: spin 25s linear infinite;
 }
+
+/* Mobile App Enhancements */
+@media (max-width: 768px) {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

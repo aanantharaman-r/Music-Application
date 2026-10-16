@@ -668,10 +668,10 @@ function Player({
       )}
 
       {/* BOTTOM PLAYER BAR */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#070708]/98 border-t border-zinc-900/80 px-4 md:px-6 py-3 flex flex-col md:flex-row md:items-center justify-between shadow-2xl transition-all duration-300">
+      <div className="fixed bottom-[56px] md:bottom-0 left-0 right-0 z-50 bg-[#070708]/98 md:bg-[#070708]/98 border-t border-zinc-800/80 px-3 md:px-6 py-2 md:py-3 flex flex-col md:flex-row md:items-center justify-between shadow-2xl transition-all duration-300 backdrop-blur-xl">
         
         {/* Interactive tracking line at the top edge for mobile */}
-        <div className="absolute top-0 left-0 right-0 h-3 md:hidden z-30 group/slider">
+        <div className="absolute top-0 left-0 right-0 h-2.5 md:hidden z-30 group/slider">
           <input
             type="range"
             min="0"
@@ -686,11 +686,11 @@ function Player({
               }
               setProgress(t)
             }}
-            className="absolute -top-1.5 left-0 w-full h-5 opacity-0 cursor-pointer z-40 touch-none"
+            className="absolute -top-1 left-0 w-full h-4 opacity-0 cursor-pointer z-40 touch-none"
           />
-          <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-zinc-800/80 group-hover/slider:h-[4px] transition-all duration-200">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-zinc-800/80 group-hover/slider:h-[3px] transition-all duration-200">
             <div 
-              className="h-full bg-white group-hover/slider:bg-violet-500 transition-colors duration-200" 
+              className="h-full bg-violet-400 group-hover/slider:bg-violet-300 transition-colors duration-200" 
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -704,14 +704,14 @@ function Player({
               src={currentSong.image}
               alt=""
               onClick={() => setFullscreen(true)}
-              className="w-12 h-12 md:w-14 md:h-14 object-cover flex-shrink-0 cursor-pointer hover:opacity-85 transition-opacity rounded-lg"
+              className="w-10 h-10 md:w-14 md:h-14 object-cover flex-shrink-0 cursor-pointer hover:opacity-85 transition-opacity rounded-lg shadow-sm"
             />
 
-            <div className="min-w-0 flex-1 ml-3 cursor-pointer" onClick={() => setFullscreen(true)}>
+            <div className="min-w-0 flex-1 ml-2.5 md:ml-3 cursor-pointer" onClick={() => setFullscreen(true)}>
               <h2 className="font-bold text-white text-xs md:text-sm truncate leading-snug hover:underline">
                 {currentSong.title}
               </h2>
-              <p className="text-white/90 font-medium text-[10px] md:text-xs truncate mt-0.5 hover:underline">
+              <p className="text-zinc-400 font-medium text-[10px] md:text-xs truncate mt-0.5 hover:underline">
                 {currentSong.artist}
               </p>
             </div>
