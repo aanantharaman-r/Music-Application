@@ -574,7 +574,9 @@ function App() {
       />
 
 
-      <div className="flex-1 flex flex-col h-screen overflow-y-auto z-10 pb-40 md:pb-28 xl:mr-[340px]">
+      <div className={`flex-1 flex flex-col h-screen overflow-y-auto z-10 pb-40 md:pb-28 transition-all duration-300 ${
+        currentSong ? "xl:mr-[340px]" : "mr-0"
+      }`}>
         
         {/* DESKTOP/MAIN HEADER WITH TOP CENTER SEARCH BAR */}
         <div className="hidden md:flex items-center justify-between gap-4 px-8 py-3.5 bg-zinc-950/70 backdrop-blur-md sticky top-0 z-30 border-b border-zinc-900/60 shadow-lg">

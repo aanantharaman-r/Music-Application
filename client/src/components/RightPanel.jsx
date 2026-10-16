@@ -25,31 +25,13 @@ function RightPanel({
   showToast
 }) {
   if (!currentSong) {
-    return (
-      <aside className="hidden xl:flex flex-col fixed top-0 right-0 w-[340px] h-screen bg-zinc-950/80 border-l border-zinc-900/80 backdrop-blur-xl p-6 overflow-y-auto flex-shrink-0 z-20 select-none">
-        <div className="flex items-center justify-between border-b border-zinc-900/80 pb-4 mb-6">
-          <h3 className="font-extrabold text-white text-sm tracking-wider uppercase flex items-center gap-2">
-            <FaMusic className="text-violet-500 text-xs" /> Now Playing
-          </h3>
-        </div>
-
-        <div className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-zinc-900/30 border border-zinc-900 rounded-2xl my-auto">
-          <div className="w-16 h-16 rounded-full bg-violet-600/10 border border-violet-500/20 flex items-center justify-center mb-4 text-violet-400">
-            <FaMusic className="text-2xl animate-pulse" />
-          </div>
-          <h4 className="font-bold text-white text-sm">No track playing</h4>
-          <p className="text-xs text-zinc-400 mt-1 max-w-[200px]">
-            Select any song from Home or Search to start listening.
-          </p>
-        </div>
-      </aside>
-    )
+    return null
   }
 
   const progressPercent = duration ? (progress / duration) * 100 : 0
 
   return (
-    <aside className="hidden xl:flex flex-col fixed top-0 right-0 w-[340px] h-screen bg-zinc-950/90 border-l border-zinc-900/80 backdrop-blur-xl p-6 overflow-y-auto custom-scrollbar flex-shrink-0 z-20 pb-36 select-none">
+    <aside className="hidden xl:flex flex-col fixed top-0 right-0 w-[340px] h-screen bg-zinc-950/90 border-l border-zinc-900/80 backdrop-blur-xl p-6 overflow-y-auto custom-scrollbar flex-shrink-0 z-20 pb-36 select-none animate-in slide-in-from-right duration-300 shadow-2xl">
       
       {/* HEADER */}
       <div className="flex items-center justify-between border-b border-zinc-900/80 pb-4 mb-5 flex-shrink-0">
